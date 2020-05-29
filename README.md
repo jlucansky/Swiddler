@@ -6,7 +6,7 @@
 
 ![](https://raw.githubusercontent.com/jlucansky/Swiddler/master/Images/screen.gif)
 
-## Features
+# Features
 ### Capture & Inspect
 - Capture virtually unlimited amount of data
 - Export captured raw data (drag selection to file)
@@ -34,11 +34,12 @@
 - Request or send client certificate
 
 
-## Minimum requirements
+# Minimum requirements
 - .NET Framework 4.5
 - Windows 7 SP1 or higher
 - Windows Server 2008 SP2 or higher
 
-## License
+# License
 This project is made available under the Apache License 2.0
+
 See [LICENSE](LICENSE) for details.
