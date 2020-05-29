@@ -4,6 +4,8 @@
 
 # TCP/UDP debugging tool
 
+![](https://raw.githubusercontent.com/jlucansky/Swiddler/master/Images/screen.gif)
+
 ## Features
 ### Capture & Inspect
 - Capture virtually unlimited amount of data
