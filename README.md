@@ -1,8 +1,9 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jlucansky/Swiddler/master/Images/logo.png" height="256">
-  <h1 align="center">Swiddler</h1>
+  <img src="https://raw.githubusercontent.com/jlucansky/Swiddler/master/Images/logo.png" height="192">
 </p>
----
+<p align="center">
+  TCP/UDP debugging tool
+</p>
 
 ## Features
 ### Capture & Inspect
