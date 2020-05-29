@@ -1,0 +1,71 @@
+﻿<UserControl x:Class="Swiddler.Views.Fragments.SslHandshakeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:Rendering="clr-namespace:Swiddler.Rendering"
+             xmlns:Controls="clr-namespace:Swiddler.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="45" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Rendering:SslHandshakeFragment, IsDesignTimeCreatable=True}"
+             Margin="1">
+
+    <UserControl.Resources>
+        <Style x:Key="CaptionTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="#404040" />
+            <Setter Property="Margin" Value="0" />
+        </Style>
+    </UserControl.Resources>
+
+    <Border Margin="5 4 5 8" Background="#F8F8F8" BorderBrush="#E8E8E8" BorderThickness="{Binding OneByDpiScale}" Cursor="Arrow" Name="Border"
+            MouseLeftButtonDown="Border_MouseDown">
+        <StackPanel Orientation="Horizontal">
+            <Button Height="24" Width="32" Background="Transparent" Cursor="Hand" IsEnabled="{Binding Model.IsAuthenticated}"
+                    Focusable="False" FocusVisualStyle="{x:Null}"
+                    ToolTip="{Binding ToolTip}"
+                    Click="Cert_Click" Name="btnCert">
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                            <Controls:CrispImage ImageName="{Binding IconName}" Width="16" Height="16" x:Name="img"
+                                                 SnapsToDevicePixels="True" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" TargetName="img" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <TextBlock Style="{StaticResource CaptionTextStyle}" Text="{Binding Model.ProtocolVersion}"/>
+            <TextBlock VerticalAlignment="Center" Margin="4 0" Text="{Binding Model.Message}"/>
+            <TextBlock VerticalAlignment="Center" Margin="4 0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Setters>
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Setter Property="Opacity" Value=".5"/>
+                            <!--<Setter Property="Visibility" Value="Hidden"/>-->
+                        </Style.Setters>
+                        <Style.Triggers>
+                            <!--<Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="1"/>
+                            </Trigger>-->
+                            <DataTrigger Binding="{Binding IsMouseOver, ElementName=Border}" Value="True">
+                                <!--<Setter Property="Visibility" Value="Visible"/>-->
+                                <Setter Property="Opacity" Value="1"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+                <Hyperlink Click="Details_Click">Handshake Details</Hyperlink>
+            </TextBlock>
+
+        </StackPanel>
+    </Border>
+
+</UserControl>

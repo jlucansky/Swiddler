@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="Swiddler.Views.Fragments.MessageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:Rendering="clr-namespace:Swiddler.Rendering"
+             xmlns:Controls="clr-namespace:Swiddler.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="50" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Rendering:MessageFragment, IsDesignTimeCreatable=True}"
+             Margin="1">
+
+    <Border BorderBrush="{Binding Source.Color}" BorderThickness="{Binding OneByDpiScale}" Margin="5 7" Cursor="Arrow">
+        <DockPanel>
+            <Border Background="{Binding Source.Color}">
+                <Controls:CrispImage ImageName="{Binding Source.IconName}" Width="32" Height="32" Margin="5 0" />
+            </Border>
+            <TextBox Text="{Binding Source.Text, Mode=OneTime}" VerticalAlignment="Center"
+                 TextWrapping="Wrap"
+                 IsReadOnly="True" BorderBrush="{x:Null}" BorderThickness="0" Margin="5 0 0 0" />
+        </DockPanel>
+    </Border>
+    
+
+</UserControl>

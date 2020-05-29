@@ -1,0 +1,64 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:Swiddler.Controls">
+
+    <Style TargetType="Controls:TreeToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="TreeArrow.Static.Checked.Fill" Color="#1E1E1E"/>
+            <SolidColorBrush x:Key="TreeArrow.Static.Checked.Stroke" Color="#1E1E1E"/>
+            <SolidColorBrush x:Key="TreeArrow.MouseOver.Stroke" Color="#26a0da"/>
+            <SolidColorBrush x:Key="TreeArrow.MouseOver.Fill" Color="Transparent"/>
+            <SolidColorBrush x:Key="TreeArrow.MouseOver.Checked.Stroke" Color="#26a0da"/>
+            <SolidColorBrush x:Key="TreeArrow.MouseOver.Checked.Fill" Color="#26a0da"/>
+            <SolidColorBrush x:Key="TreeArrow.Static.Fill" Color="Transparent"/>
+            <SolidColorBrush x:Key="TreeArrow.Static.Stroke" Color="#1E1E1E"/>
+
+            <PathGeometry x:Key="TreeArrow" Figures="M0.5 0.5L0.5 6.5 6.5 0.5z"/>
+
+        </Style.Resources>
+        <Setter Property="ClickMode" Value="Press"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Width" Value="14"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border Background="Transparent" Padding="0 4 0 0"
+                            VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Path x:Name="ExpandPath" Data="{StaticResource TreeArrow}" 
+                              Stroke="{StaticResource TreeArrow.Static.Stroke}"
+                              Fill="{StaticResource TreeArrow.Static.Fill}">
+                            <Path.RenderTransform>
+                                <RotateTransform Angle="135" CenterX="3" CenterY="3"/>
+                            </Path.RenderTransform>
+                        </Path>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="RenderTransform" TargetName="ExpandPath">
+                                <Setter.Value>
+                                    <RotateTransform Angle="180" CenterX="3" CenterY="3"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Fill" TargetName="ExpandPath" Value="{StaticResource TreeArrow.Static.Checked.Fill}"/>
+                            <Setter Property="Stroke" TargetName="ExpandPath" Value="{StaticResource TreeArrow.Static.Checked.Stroke}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Stroke" TargetName="ExpandPath" Value="{StaticResource TreeArrow.MouseOver.Stroke}"/>
+                            <Setter Property="Fill" TargetName="ExpandPath" Value="{StaticResource TreeArrow.MouseOver.Fill}"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                                <Condition Property="IsChecked" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Stroke" TargetName="ExpandPath" Value="{StaticResource TreeArrow.MouseOver.Checked.Stroke}"/>
+                            <Setter Property="Fill" TargetName="ExpandPath" Value="{StaticResource TreeArrow.MouseOver.Checked.Fill}"/>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

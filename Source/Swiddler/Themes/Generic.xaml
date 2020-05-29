@@ -1,0 +1,13 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+    <ResourceDictionary.MergedDictionaries>
+        <!-- all custom control styles include below -->
+
+        <ResourceDictionary Source="/Swiddler;component/Controls/CrispImage.xaml" />
+        <ResourceDictionary Source="/Swiddler;component/Controls/ChunkView.xaml" />
+        <ResourceDictionary Source="/Swiddler;component/Controls/TileButton.xaml" />
+        <ResourceDictionary Source="/Swiddler;component/Controls/SessionListView.xaml" />
+        <ResourceDictionary Source="/Swiddler;component/Controls/TreeToggleButton.xaml" />
+        <ResourceDictionary Source="/Swiddler;component/Controls/SearchTextBox.xaml" />
+        
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

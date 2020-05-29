@@ -1,0 +1,21 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:Swiddler.Controls"
+                    xmlns:Converters="clr-namespace:Swiddler.Converters">
+
+    <Converters:CrispImageConverter x:Key="CrispImageConverter" />
+
+    <Style TargetType="{x:Type Controls:CrispImage}">
+        <Setter Property="Source">
+            <Setter.Value>
+                <MultiBinding Mode="OneWay" Converter="{StaticResource CrispImageConverter}">
+                    <Binding Mode="OneWay" Path="Width" RelativeSource="{RelativeSource Self}" />
+                    <Binding Mode="OneWay" Path="Height" RelativeSource="{RelativeSource Self}" />
+                    <Binding Mode="OneWay" Path="ImageName" RelativeSource="{RelativeSource Self}" />
+                    <Binding Mode="OneWay" Path="(Controls:CrispImage.Dpi)" RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

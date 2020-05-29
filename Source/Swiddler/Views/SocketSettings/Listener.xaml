@@ -1,0 +1,116 @@
+﻿<UserControl x:Class="Swiddler.Views.SocketSettings.Listener"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:Controls="clr-namespace:Swiddler.Controls"
+             xmlns:Converters="clr-namespace:Swiddler.Converters"
+             xmlns:e="clr-namespace:Swiddler.MarkupExtensions"
+             xmlns:b="clr-namespace:Swiddler.Behaviors"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:Swiddler.ViewModels"
+             xmlns:sock="clr-namespace:Swiddler.SocketSettings"
+             mc:Ignorable="d"
+             d:DataContext="{x:Static sock:TCPServerSettings.DesignInstance}" >
+    
+    <StackPanel Margin="4 0 4 4">
+        <StackPanel.Resources>
+            <Style TargetType="Label">
+                <Setter Property="Padding" Value="2 4" />
+                <Setter Property="Margin" Value="4 0" />
+            </Style>
+        </StackPanel.Resources>
+
+        <Grid Margin="0 4" HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Target="{Binding ElementName=cmbAddress}">Local _address</Label>
+            <Controls:ComboBoxEx IsEditable="True" x:Name="cmbAddress"
+                      Margin="4 0" Width="260" Height="22" Grid.Row="1" Style="{StaticResource IPAdapterComboBox}"
+                      Text="{Binding IPAddress, UpdateSourceTrigger=PropertyChanged}"
+                      ItemsSource="{e:GroupedIPAddresses}">
+                <ComboBox.GroupStyle>
+                    <GroupStyle HeaderTemplate="{StaticResource IPAdapterHeaderTemplate}" />
+                </ComboBox.GroupStyle>
+            </Controls:ComboBoxEx>
+
+            <Label Target="{Binding ElementName=txtPort}" Grid.Column="1">_Port</Label>
+            <TextBox Name="txtPort" Margin="4 0" Width="50" Height="22" Grid.Column="1" Grid.Row="1"
+                     VerticalContentAlignment="Center" b:TextBox.SelectAllText="True" b:TextBox.NumericRange="1 65535"
+                     Text="{Binding Port, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" />
+        </Grid>
+
+        <CheckBox Margin="4" HorizontalAlignment="Left" IsChecked="{Binding DualMode}">IPv4/IPv6 dual-stack</CheckBox>
+        <CheckBox Margin="4" HorizontalAlignment="Left" IsChecked="{Binding ReuseAddress}">Reuse address</CheckBox>
+        <CheckBox Margin="4" HorizontalAlignment="Left" IsChecked="{Binding EnableSSL}">Enable SSL/TLS</CheckBox>
+
+        <StackPanel Visibility="{Binding EnableSSL, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+            <ComboBox Margin="4 0 0 8" Width="260" Height="22" HorizontalAlignment="Left" Style="{StaticResource SslSelectionComboBox}">
+                <ComboBox.GroupStyle>
+                    <GroupStyle HeaderTemplate="{StaticResource SslSelectionComboBoxHeaderTemplate}" />
+                </ComboBox.GroupStyle>
+            </ComboBox>
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                <Label Margin="4 0 0 0" Target="{Binding ElementName=cmbServerCert}" HorizontalAlignment="Left">Server certificate</Label>
+                <Button Style="{StaticResource CertSettingsButton}" DataContext="{Binding ServerCertificate}" Name="btnServerCertMenu"/>
+            </StackPanel>
+            <ComboBox x:Name="cmbServerCert" IsSynchronizedWithCurrentItem="False"
+                      SelectedValue="{Binding ServerCertificate, UpdateSourceTrigger=PropertyChanged, Converter={Converters:CertificateThumbprintConverter}, TargetNullValue={x:Static e:CertificateSource.EmptyItem}}" 
+                      HorizontalAlignment="Left" ItemTemplate="{StaticResource CertificateListItem}"
+                      Margin="4 0 0 8" Width="318" Height="40">
+                <ItemsControl.ItemsSource>
+                    <MultiBinding Converter="{Converters:LazyBindingConverter}">
+                        <!-- Condition -->
+                        <Binding Path="EnableSSL" />
+                        <!-- Lazy<object> -->
+                        <Binding Source="{e:CertificateSource}" />
+                    </MultiBinding>
+                </ItemsControl.ItemsSource>
+            </ComboBox>
+
+            <StackPanel Orientation="Horizontal">
+                <CheckBox Margin="4" HorizontalAlignment="Left" Content="Require client certificate" IsChecked="{Binding RequireClientCertificate}"/>
+                <CheckBox Margin="8 4" HorizontalAlignment="Left" Content="Skip validation" IsChecked="{Binding IgnoreInvalidClientCertificate}" IsEnabled="{Binding RequireClientCertificate}"/>
+            </StackPanel>
+
+            <CheckBox Margin="4 8 0 4" HorizontalAlignment="Left" Content="Automatically generate certificates based on SNI" IsChecked="{Binding AutoGenerateServerCertificate}"/>
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Visibility="{Binding AutoGenerateServerCertificate, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Label Margin="4 0 0 0" Target="{Binding ElementName=cmbCA}" HorizontalAlignment="Left" Content="Certificate authority" />
+                <Button Style="{StaticResource CertSettingsButton}" DataContext="{Binding CertificateAuthority}" Name="btnCAMenu"/>
+            </StackPanel>
+            <ComboBox x:Name="cmbCA" IsSynchronizedWithCurrentItem="False"
+                      Visibility="{Binding AutoGenerateServerCertificate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      SelectedValue="{Binding CertificateAuthority, UpdateSourceTrigger=PropertyChanged, Converter={Converters:CertificateThumbprintConverter}, TargetNullValue={x:Static e:CertificateSource.EmptyItem}}" 
+                      HorizontalAlignment="Left" ItemTemplate="{StaticResource CertificateListItem}"
+                      Margin="4 0 0 4" Width="318" Height="40">
+                <ItemsControl.ItemsSource>
+                    <MultiBinding Converter="{Converters:LazyBindingConverter}">
+                        <!-- Condition -->
+                        <Binding Path="EnableSSL" />
+                        <!-- Lazy<object> -->
+                        <Binding Source="{e:CertificateSource FilterKeyCertSign=True}" />
+                    </MultiBinding>
+                </ItemsControl.ItemsSource>
+            </ComboBox>
+
+            <Label Target="{Binding ElementName=txtCertPrefix}" HorizontalAlignment="Left" 
+                   Visibility="{Binding AutoGenerateServerCertificate, Converter={StaticResource BooleanToVisibilityConverter}}">Generated certificate CN prefix</Label>
+            <TextBox Name="txtCertPrefix" Margin="4 0 0 4" Width="260" Height="22"
+                     Visibility="{Binding AutoGenerateServerCertificate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                     VerticalContentAlignment="Center" b:TextBox.SelectAllText="True" HorizontalAlignment="Left"
+                     Text="{Binding GeneratedServerCertificatePrefix, UpdateSourceTrigger=PropertyChanged}" />
+
+        </StackPanel>
+        
+
+    </StackPanel>
+</UserControl>

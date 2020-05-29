@@ -1,0 +1,30 @@
+﻿<Application x:Class="Swiddler.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:e="clr-namespace:Swiddler.MarkupExtensions" 
+             xmlns:Converters="clr-namespace:Swiddler.Converters"
+             >
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <x:Static x:Key="Int32.MaxValue" Member="sys:Int32.MaxValue" />
+                    <WindowChrome x:Key="ShadowWindowChrome" GlassFrameThickness="0" 
+                                  ResizeBorderThickness="8" CornerRadius="0" CaptionHeight="0" NonClientFrameEdges="None" />
+
+                    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+                    <Converters:TreeIndentConverter x:Key="TreeIndentConverter"/>
+                    <Converters:IntEnumConverter x:Key="IntEnumConverter" />
+                </ResourceDictionary>
+
+                <ResourceDictionary Source="/Swiddler;component/Themes/Generic.xaml" />
+                <ResourceDictionary Source="/Swiddler;component/Resources/CustomStyles.xaml" />
+                <ResourceDictionary Source="/Swiddler;component/Resources/Brushes.xaml" />
+                <ResourceDictionary Source="/Swiddler;component/Resources/Misc.xaml" />
+                
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

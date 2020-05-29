@@ -1,0 +1,76 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:Swiddler.Controls">
+    
+    <!-- this resource is for include only ! -->
+    
+    <Style TargetType="Separator">
+        <Setter Property="Margin" Value="4 0"/>
+        <Setter Property="Template" Value="{x:Null}"/>
+    </Style>
+
+    <Style TargetType="{x:Type Controls:LockableToggleButton}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="Button.Static.Foreground" Color="Black"/>
+            <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#210080FF"/>
+            <SolidColorBrush x:Key="Button.MouseOverChecked.Background" Color="#268ed4"/>
+            <SolidColorBrush x:Key="Button.Pressed.Foreground" Color="#F0F0FF"/>
+            <SolidColorBrush x:Key="Button.Pressed.Background" Color="#0068ad"/>
+            <SolidColorBrush x:Key="Button.Checked.Foreground" Color="White"/>
+            <SolidColorBrush x:Key="Button.Checked.Background" Color="#007ACC"/>
+            <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
+            <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
+        </Style.Resources>
+        <Setter Property="Background" Value="{StaticResource Swiddler.ControlLightBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource Button.Static.Foreground}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="16 2 16 3"/>
+        <Setter Property="Margin" Value="0 0 2 0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:LockableToggleButton}">
+                    <Border x:Name="border" SnapsToDevicePixels="true"
+                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                            BorderThickness="{TemplateBinding BorderThickness}" 
+                                            Background="{TemplateBinding Background}" CornerRadius="2">
+                        <ContentPresenter x:Name="contentPresenter" Focusable="False"
+                                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                          Margin="{TemplateBinding Padding}" 
+                                                          RecognizesAccessKey="True"
+                                                          SnapsToDevicePixels="True"
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Checked.Background}"/>
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Checked.Foreground}"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="true" />
+                                <Condition Property="IsChecked" Value="true" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOverChecked.Background}"/>
+                        </MultiTrigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Pressed.Background}"/>
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Pressed.Foreground}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Disabled.Background}"/>
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

@@ -1,0 +1,16 @@
+﻿<Viewbox Width="16" Height="16" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <Rectangle Width="16" Height="16">
+    <Rectangle.Fill>
+      <DrawingBrush>
+        <DrawingBrush.Drawing>
+          <DrawingGroup>
+            <DrawingGroup.Children>
+				<GeometryDrawing Brush="Transparent" Geometry="F1 M 0,21.3333L 21.3333,21.3333L 21.3333,0L 0,0L 0,21.3333 Z "/>
+				<GeometryDrawing Brush="#FFFFFFFF" Geometry="F1 M 13.7181,10.6667L 18.6661,15.6147L 15.6155,18.6667L 10.6661,13.7187L 5.71813,18.6667L 2.66613,15.6147L 7.61547,10.6667L 2.66613,5.71867L 5.71813,2.66667L 10.6661,7.61467L 15.6155,2.66667L 18.6661,5.71867L 13.7181,10.6667 Z "/>
+            </DrawingGroup.Children>
+          </DrawingGroup>
+        </DrawingBrush.Drawing>
+      </DrawingBrush>
+    </Rectangle.Fill>
+  </Rectangle>
+</Viewbox>

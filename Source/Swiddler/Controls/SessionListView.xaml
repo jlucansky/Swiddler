@@ -1,0 +1,45 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:Swiddler.Controls">
+
+    <Style TargetType="Controls:SessionListView">
+        <Style.Resources>
+            <SolidColorBrush x:Key="SelectedBackgroundBrush">#cde8ff</SolidColorBrush>
+            <SolidColorBrush x:Key="SelectedBorderBrush">#26a0da</SolidColorBrush>
+
+            <Style x:Key="ItemContainerStyle" TargetType="ListViewItem">
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Foreground" Value="Black"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListViewItem">
+                            <Border x:Name="Border" SnapsToDevicePixels="true" BorderThickness="0" Background="Transparent">
+                                <Grid>
+                                    <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="0 4 0 5" />
+                                    <Rectangle Name="Flag" Width="2" Fill="{Binding StateBrush}" HorizontalAlignment="Left" Margin="1 1"/>
+                                </Grid>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <!--<Trigger Property="IsMouseOver" Value="true">
+                                    <Setter TargetName="Border" Property="Background" Value="{StaticResource HighlightBackgroundBrush}"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource HighlightBorderBrush}"/>
+                                </Trigger>-->
+
+                                <Trigger Property="IsSelected" Value="true">
+                                    <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedBackgroundBrush}"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource SelectedBorderBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Style.Resources>
+
+        <Setter Property="ItemContainerStyle" Value="{StaticResource ItemContainerStyle}"/>
+    </Style>
+    
+</ResourceDictionary>

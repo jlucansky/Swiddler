@@ -1,0 +1,359 @@
+﻿<Window x:Class="Swiddler.Views.NewConnection"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:Swiddler.Views"
+        xmlns:Controls="clr-namespace:Swiddler.Controls"
+        xmlns:Converters="clr-namespace:Swiddler.Converters"
+        xmlns:cmd="clr-namespace:Swiddler.Commands"
+        xmlns:e="clr-namespace:Swiddler.MarkupExtensions"
+        xmlns:b="clr-namespace:Swiddler.Behaviors"
+        xmlns:vm="clr-namespace:Swiddler.ViewModels"
+        xmlns:sock="clr-namespace:Swiddler.SocketSettings"
+        xmlns:av="clr-namespace:Swiddler.Views.SocketSettings"
+        mc:Ignorable="d"
+
+        d:DesignHeight="1000" 
+        MinWidth="640" MinHeight="480"
+        
+        b:FrameworkElement.SetDpi="True"
+        b:Window.DisableControls="True"
+        
+        WindowStartupLocation="CenterOwner"
+        Background="White"
+        ShowInTaskbar="False"
+        ResizeMode="CanResize"
+        WindowStyle="None"
+        BorderBrush="#CCCEDB"
+        BorderThickness="{e:OneByDpiScale AsThickness=True}"
+        WindowChrome.WindowChrome="{StaticResource ShadowWindowChrome}"
+        >
+
+    <Window.InputBindings>
+        <KeyBinding Command="{x:Static cmd:MiscCommands.Search}" Gesture="F3" />
+        <KeyBinding Command="{x:Static cmd:MiscCommands.Search}" Gesture="CTRL+F" />
+    </Window.InputBindings>
+
+    <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="250" Name="leftCol" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="1.5*" MinWidth="370" Name="rightCol" />
+        </Grid.ColumnDefinitions>
+        <Grid SnapsToDevicePixels="True" UseLayoutRounding="True" Background="{StaticResource Swiddler.ControlLightBrush}" MouseLeftButtonDown="DragMove">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock VerticalAlignment="Center" Margin="20 24 0 16" FontSize="20" UseLayoutRounding="False" SnapsToDevicePixels="True">Frequently used</TextBlock>
+            <Controls:SearchTextBox Grid.Row="1" Height="30" Margin="16 0 12 0" FontSize="14" BorderThickness="{e:OneByDpiScale AsThickness=True}" 
+                                    x:Name="SearchTextBox"
+                                    PreviewKeyDown="SearchTextBox_PreviewKeyDown"
+                                    Text="{Binding SearchTextBoxValue, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" />
+
+            <!-- [Recent items] -->
+            <ListBox Margin="16 8 0 8" Grid.Row="2" Background="Transparent" Name="QuickActionsListBox"
+                     FocusVisualStyle="{x:Null}"
+                     ItemsSource="{Binding QuickActionsView}"
+                     IsSynchronizedWithCurrentItem="False"
+                     SelectedItem="{Binding SelectedQuickAction}"
+                     ScrollViewer.CanContentScroll="False"
+                     Converters:ScrollBarVisibility.NonVisibleValue="Hidden"
+                     KeyDown="QuickActions_KeyDown">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="Margin" Value="-5 0 0 0"></Setter>
+                        <EventSetter Event="MouseDoubleClick" Handler="QuickActions_MouseDoubleClick" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.Resources>
+                    <DataTemplate DataType="{x:Type vm:QuickActionItem}">
+                        <Grid Margin="2 4 4 4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Margin="0 0 4 0">
+                                <Controls:CrispImage Width="20" Height="20" ImageName="{Binding Icon}" Margin="4 0" />
+                                <Controls:CrispImage Width="10" Height="10" ImageName="Star" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                            </Grid>
+                            <TextBlock Text="{Binding Description}" Grid.Column="1" VerticalAlignment="Center" Margin="2 0" />
+                        </Grid>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:RecentlyUsedItem}">
+                        <Grid Margin="0 4 4 4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Controls:CrispImage Width="32" Height="32" ImageName="{Binding Icon}" Grid.RowSpan="2" Margin="0 0 4 0"/>
+                            <TextBlock FontWeight="Bold" Text="{Binding Caption}" Grid.Column="1" Grid.Row="0"/>
+                            <TextBlock FontSize="10" Text="{Binding DateTime}" Grid.Column="2" Grid.Row="0" Margin="4 0 0 0" />
+                            <TextBlock Text="{Binding Description}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.Resources>
+                <ListBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock x:Name="hdr" FontWeight="Bold" Text="{Binding Name}" Margin="0 4 0 2" />
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Name}" Value="{x:Null}">
+                                        <Setter TargetName="hdr" Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </ListBox.GroupStyle>
+                <ListBox.Style>
+                    <Style TargetType="{x:Type ListBox}">
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBox}">
+                                    <ScrollViewer Focusable="False" Padding="{TemplateBinding Padding}" Style="{StaticResource FlatScrollViewerStyle}">
+                                        <Border Padding="0 4 4 4">
+                                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                        </Border>
+                                    </ScrollViewer>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.Style>
+
+            </ListBox>
+        </Grid>
+        
+        <!-- vertical || splitter -->
+        <GridSplitter Grid.Column="1" ResizeDirection="Columns" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowsPreview="False" Focusable="False" Background="{StaticResource Swiddler.ControlLightBrush}" />
+        
+        <Grid Grid.Column="2" SnapsToDevicePixels="True" UseLayoutRounding="True" 
+              Background="White" MouseLeftButtonDown="DragMove"
+              DataContext="{Binding ConnectionSettings}" Name="ConnectionSettingsControl"
+              d:DataContext="{x:Static vm:ConnectionSettings.DesignInstance}">
+            <Grid.RowDefinitions>
+                <!-- Title + Close Button -->
+                <RowDefinition Height="Auto" />
+                <!-- TCP/UDP Client/Server -->
+                <RowDefinition Height="Auto" />
+                <!-- Clipboard Hint -->
+                <RowDefinition Height="Auto" />
+                <!-- [sockets] -->
+                <RowDefinition Height="*" />
+                <!-- OK / Cancel -->
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Title -->
+                <TextBlock FontSize="32" Margin="20 16 0 8" VerticalAlignment="Center" Text="New connection" HorizontalAlignment="Left" />
+
+                <!-- Close Button -->
+                <Button VerticalAlignment="Top" Grid.Column="1" Width="46" Height="33"
+                    Style="{StaticResource WindowControlButton}" ToolTip="Close"
+                    Click="Close" Content="{StaticResource Swiddler.Glyph.Cross}" />
+            </Grid>
+
+            <!-- Toolbar:   TCP/UDP   Client/Server -->
+            <StackPanel Orientation="Horizontal" Margin="16 8" Grid.Row="1">
+                <StackPanel.Resources>
+                    <ResourceDictionary Source="/Swiddler;component/Resources/SocketToggles.xaml" />
+                </StackPanel.Resources>
+
+                <Controls:LockableToggleButton LockToggle="{Binding TCPToggleLocked}" IsChecked="{Binding TCPChecked}" Content="_TCP" />
+                <Controls:LockableToggleButton LockToggle="{Binding UDPToggleLocked}" IsChecked="{Binding UDPChecked}" Content="_UDP" />
+                <Separator />
+                <Controls:LockableToggleButton LockToggle="{Binding ServerToggleLocked}" IsChecked="{Binding ServerChecked}" Content="{Binding ServerToggleText}" Visibility="{Binding AnyProtocolChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Controls:LockableToggleButton LockToggle="{Binding ClientToggleLocked}" IsChecked="{Binding ClientChecked}" Content="{Binding ClientToggleText}" Visibility="{Binding AnyProtocolChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Separator />
+                
+                <Controls:LockableToggleButton Padding="6 0" LockToggle="True" Content="＋" 
+                                               Visibility="{Binding AnyProtocolChecked, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                               b:Button.ClickOpensContextMenu="True"
+                                               ContextMenuService.Placement="Bottom">
+                    <Controls:LockableToggleButton.Style>
+                        <Style TargetType="Controls:LockableToggleButton" BasedOn="{StaticResource {x:Type Controls:LockableToggleButton}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ContextMenu.IsOpen, RelativeSource={RelativeSource Self}}" Value="True">
+                                    <Setter Property="IsChecked" Value="True"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Controls:LockableToggleButton.Style>
+                    <Controls:LockableToggleButton.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Visibility="Visible" Header="Add Data Rewrite" Click="AddRewriter_Click">
+                                <MenuItem.Icon>
+                                    <Controls:CrispImage ImageName="Edit" Height="16" Width="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Controls:LockableToggleButton.ContextMenu>
+                </Controls:LockableToggleButton>
+            </StackPanel>
+
+            <!-- Clipboard Hint -->
+            <Border x:Name="hintPanel" Visibility="Collapsed" Grid.Row="2" Margin="16 0 16 4" Padding="4"
+                    BorderBrush="#c9c897" Background="#fefcc8" BorderThickness="{e:OneByDpiScale AsThickness=True}"
+                    MouseDown="HintPanel_MouseDown">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Click="CloseHint_Click" ToolTip="Close">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Controls:CrispImage x:Name="img" ImageName="Close" Height="16" Width="16" Focusable="False" SnapsToDevicePixels="True" />
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" TargetName="img" Value="0.7"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <TextBlock TextTrimming="CharacterEllipsis" Margin="4 0">Use <Hyperlink Foreground="#0097fb" Click="ClipboardLink_Click"><TextBlock Name="clipboardLink" Text="tcp://"/></Hyperlink> from clipboard</TextBlock>
+                </DockPanel>
+            </Border>
+
+
+            <!-- [Connection Sockets] -->
+            <ScrollViewer Padding="4 0" Margin="12 0" Grid.Row="3" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalOnly">
+                <ScrollViewer.Style>
+                    <Style TargetType="ScrollViewer" BasedOn="{StaticResource FlatScrollViewerStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Settings.Count}" Value="0">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <Image Source="/Swiddler;component/Images/Watermark.png" Width="384" Height="384"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ScrollViewer.Style>
+                <ItemsControl Focusable="False" ItemsSource="{Binding Settings}">
+                    <ItemsControl.Resources>
+                        <DataTemplate DataType="{x:Type sock:TCPServerSettings}">
+                            <av:Listener />
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type sock:TCPClientSettings}">
+                            <av:Client />
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type sock:UDPClientSettings}">
+                            <av:UDPClient />
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type sock:UDPServerSettings}">
+                            <av:UDPServer />
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type sock:RewriteSettings}">
+                            <av:Rewrite />
+                        </DataTemplate>
+                    </ItemsControl.Resources>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type sock:SettingsBase}">
+                            <StackPanel Name="panel" Background="White">
+                                <DockPanel Margin="0 10 0 2">
+                                    <Controls:CrispImage ImageName="{Binding ImageName}" Height="20" Width="20" />
+                                    <TextBlock FontWeight="Bold" Margin="4 2" Text="{Binding Caption}" />
+                                    <Button DockPanel.Dock="Right" Click="DeleteSettings_Click" VerticalAlignment="Bottom" ToolTip="Remove"
+                                            Focusable="False" FocusVisualStyle="{x:Null}" IsTabStop="False">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Visibility" Value="Hidden" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Controls:CrispImage x:Name="img" ImageName="Trash" Height="16" Width="16"  Focusable="False"
+                                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                              SnapsToDevicePixels="True"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                        
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="False">
+                                                                    <Setter Property="Opacity" TargetName="img" Value="0.5"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsPressed" Value="True">
+                                                                    <Setter Property="Opacity" TargetName="img" Value="0.7"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMouseOver, ElementName=panel}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <!-- fill space between delete button with border -->
+                                    <Border/>
+                                </DockPanel>
+                                <Border Margin="0" Background="{StaticResource Swiddler.ControlLightBrush}" CornerRadius="2">
+                                    <ContentPresenter Content="{Binding}" />
+                                </Border>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+
+            <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Right">
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Margin" Value="0 16 16 16" />
+                        <Setter Property="Padding" Value="20 5" />
+                    </Style>
+                </StackPanel.Resources>
+                <Button IsCancel="True" Click="Close">Cancel</Button>
+                <Button Click="CreateSession" Content="Create">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="IsDefault" Value="True"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Settings.Count}" Value="0">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsFocused, ElementName=SearchTextBox}" Value="True"/>
+                                        <Condition Binding="{Binding SelectedItem, ElementName=QuickActionsListBox}" Value="{x:Null}"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="IsDefault" Value="False"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+
+</Window>

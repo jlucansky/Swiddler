@@ -1,0 +1,55 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="Swiddler.ControlBrush" Color="#EEEEF2" />
+    <SolidColorBrush x:Key="Swiddler.ControlLightBrush" Color="#F5F5F5" />
+    <SolidColorBrush x:Key="Swiddler.ControlContentBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Swiddler.BorderBrush" Color="#CCCEDB" />
+
+    <SolidColorBrush x:Key="Swiddler.ActiveBrush" Color="#C9DEF5" />
+    <SolidColorBrush x:Key="Swiddler.ActiveBorderBrush" Color="#92C0E0" />
+
+    <SolidColorBrush x:Key="Swiddler.Session.Starting" Color="#FD9802" />
+    <SolidColorBrush x:Key="Swiddler.Session.Started" Color="#26D070" />
+    <SolidColorBrush x:Key="Swiddler.Session.Stopped" Color="#D02626" />
+
+    <SolidColorBrush x:Key="Swiddler.Flow.Inbound" Color="#EDEDFB" />
+    <SolidColorBrush x:Key="Swiddler.Flow.Outbound" Color="#FBEDED" />
+    <SolidColorBrush x:Key="Swiddler.Flow.Inbound.Selected" Color="#E6E6F2" />
+    <SolidColorBrush x:Key="Swiddler.Flow.Outbound.Selected" Color="#F2E6E6" />
+
+    <SolidColorBrush x:Key="Swiddler.Flow.Inbound.Stroke" Color="#B8B8D9" />
+    <SolidColorBrush x:Key="Swiddler.Flow.Outbound.Stroke" Color="#D9B8B8" />
+
+    <SolidColorBrush x:Key="Swiddler.Flow.Inbound.Text" Color="#00007F" />
+    <SolidColorBrush x:Key="Swiddler.Flow.Outbound.Text" Color="#7F0000" />
+
+    <SolidColorBrush x:Key="Swiddler.Message.Info.Brush" Color="#007ACC" />
+    <SolidColorBrush x:Key="Swiddler.Message.Error.Brush" Color="#bf3030" />
+    <SolidColorBrush x:Key="Swiddler.Message.Success.Brush" Color="#1e991e" />
+
+    <SolidColorBrush x:Key="Swiddler.Selection.Brush" Color="#a3adc7" />
+    <SolidColorBrush x:Key="Swiddler.Selection.Stroke" Color="#7d8599" />
+
+</ResourceDictionary>
+
+<!--
+  * Highlight Color *
+    
+    Win 7 (aero)
+        #FF3399FF
+    Win 8.1
+        #FF3399FF
+    Server 2012
+        #FF3399FF
+
+    Win 10
+        #FF0078D7
+    Server 2019
+        #FF0078D7
+
+    Server 2008 (classic)
+        #FF0A246A
+    Win 7 (classic)
+        #FF0A246A
+-->

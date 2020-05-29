@@ -1,0 +1,539 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F0CF9694-8294-468F-9DBD-5F253FFB44D5}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Swiddler</RootNamespace>
+    <AssemblyName>Swiddler</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>App.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationFramework.Aero2" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="AppResources.cs" />
+    <Compile Include="Behaviors\Button.cs" />
+    <Compile Include="Behaviors\TextBox.cs" />
+    <Compile Include="Behaviors\FrameworkElement.cs" />
+    <Compile Include="Behaviors\Window.cs" />
+    <Compile Include="Channels\MonitorChannel.cs" />
+    <Compile Include="Channels\RemoteChildChannel.cs" />
+    <Compile Include="Channels\RewriteChannel.cs" />
+    <Compile Include="Channels\SnifferChannel.cs" />
+    <Compile Include="Channels\SslChannel.cs" />
+    <Compile Include="Channels\SslListenerChannel.cs" />
+    <Compile Include="Channels\TcpListenerChannel.cs" />
+    <Compile Include="ChunkViews\Selection.cs" />
+    <Compile Include="Commands\CertificateCommands.cs" />
+    <Compile Include="Commands\MiscCommands.cs" />
+    <Compile Include="Common\ConnectionBanner.cs" />
+    <Compile Include="Common\DeferredDataObject.cs" />
+    <Compile Include="Common\DelayedInvoker.cs" />
+    <Compile Include="Common\Monitor.cs" />
+    <Compile Include="Common\ReloadableCollection.cs" />
+    <Compile Include="Converters\CertificateValidityConverter.cs" />
+    <Compile Include="Converters\IntEnumConverter.cs" />
+    <Compile Include="Converters\AssignableTypeConverter.cs" />
+    <Compile Include="IO\SyncedFileStream.cs" />
+    <Compile Include="Common\ValueException.cs" />
+    <Compile Include="Controls\ComboBoxEx.cs" />
+    <Compile Include="Controls\CrispImage.cs" />
+    <Compile Include="Controls\LockableToggleButton.cs" />
+    <Compile Include="Converters\FormatConverter.cs" />
+    <Compile Include="Converters\CertificateNameConverter.cs" />
+    <Compile Include="Converters\CrispImageConverter.cs" />
+    <Compile Include="Converters\InvertBoolConverter.cs" />
+    <Compile Include="Converters\LazyBindingConverter.cs" />
+    <Compile Include="Converters\ScrollBarVisibility.cs" />
+    <Compile Include="Converters\SslVersionStringConverter.cs" />
+    <Compile Include="Converters\TreeIndentConverter.cs" />
+    <Compile Include="DataChunks\MessageData.cs" />
+    <Compile Include="IO\BlockReader.cs" />
+    <Compile Include="IO\CachedBlockIterator.cs" />
+    <Compile Include="IO\ChunkDictionary.cs" />
+    <Compile Include="IO\Constants.cs" />
+    <Compile Include="IO\BlockWriter.cs" />
+    <Compile Include="IO\Test.cs" />
+    <Compile Include="IO\IDataChunk.cs" />
+    <Compile Include="IO\DataTransfer.cs" />
+    <Compile Include="MarkupExtensions\CertificateSource.cs" />
+    <Compile Include="Converters\CertificateThumbprintConverter.cs" />
+    <Compile Include="MarkupExtensions\DpiExtensions.cs" />
+    <Compile Include="MarkupExtensions\GroupedIPAddresses.cs" />
+    <Compile Include="MarkupExtensions\ShadowGlassFrameThickness.cs" />
+    <Compile Include="MarkupExtensions\SslProtocolSupport.cs" />
+    <Compile Include="Rendering\SslHandshakeFragment.cs" />
+    <Compile Include="Rendering\ConnectionFragment.cs" />
+    <Compile Include="Rendering\SelectionLayer.cs" />
+    <Compile Include="Security\CertProvider.cs" />
+    <Compile Include="Security\SslAlert.cs" />
+    <Compile Include="Security\SslCiphers.cs" />
+    <Compile Include="Security\SslClientHello.cs" />
+    <Compile Include="Security\SslExtension.cs" />
+    <Compile Include="Security\SslHelloBase.cs" />
+    <Compile Include="Security\SslServerHello.cs" />
+    <Compile Include="Security\SslStreamExt.cs" />
+    <Compile Include="Security\StreamExtensions.cs" />
+    <Compile Include="Security\X509.cs" />
+    <Compile Include="Serialization\FileHeaderXml.cs" />
+    <Compile Include="Rendering\PolygonFigure.cs" />
+    <Compile Include="Serialization\SessionXml.cs" />
+    <Compile Include="Serialization\SslHandshake.cs" />
+    <Compile Include="Serialization\UserSettings.cs" />
+    <Compile Include="SocketSettings\RewriteSettings.cs" />
+    <Compile Include="Utils\ControlExtensions.cs" />
+    <Compile Include="Utils\DateTimeExtensions.cs" />
+    <Compile Include="Utils\DependencyObjectExtensions.cs" />
+    <Compile Include="Utils\EncodingExtensions.cs" />
+    <Compile Include="Utils\ImagingExtensions.cs" />
+    <Compile Include="Common\Injector.cs" />
+    <Compile Include="Utils\TaskbarProgress.cs" />
+    <Compile Include="Utils\WindowExtensions.cs" />
+    <Compile Include="SocketSettings\SettingsBase.cs" />
+    <Compile Include="SocketSettings\TCPClientSettings.cs" />
+    <Compile Include="SocketSettings\ClientSettingsBase.cs" />
+    <Compile Include="SocketSettings\TCPServerSettings.cs" />
+    <Compile Include="SocketSettings\ServerSettingsBase.cs" />
+    <Compile Include="SocketSettings\UDPClientSettings.cs" />
+    <Compile Include="ViewModels\Certificate.cs" />
+    <Compile Include="ViewModels\QuickActionItem.cs" />
+    <Compile Include="ViewModels\IPAdapterHeader.cs" />
+    <Compile Include="ViewModels\IPAddressItem.cs" />
+    <Compile Include="ViewModels\ConnectionSettings.cs" />
+    <Compile Include="ViewModels\ProcessInfo.cs" />
+    <Compile Include="ViewModels\RecentlyUsedItem.cs" />
+    <Compile Include="ViewModels\SessionTree.cs" />
+    <Compile Include="Channels\UdpChannel.cs" />
+    <Compile Include="Controls\SessionListView.cs" />
+    <Compile Include="Controls\SearchTextBox.cs" />
+    <Compile Include="Controls\TreeToggleButton.cs" />
+    <Compile Include="Controls\TileButton.cs" />
+    <Compile Include="Converters\EmptyStringConverter.cs" />
+    <Compile Include="Channels\Channel.cs" />
+    <Compile Include="IO\StorageHandle.cs" />
+    <Compile Include="DataChunks\Packet.cs" />
+    <Compile Include="Common\Session.cs" />
+    <Compile Include="Channels\SessionChannel.cs" />
+    <Compile Include="Channels\TcpChannel.cs" />
+    <Compile Include="Rendering\MessageFragment.cs" />
+    <Compile Include="Utils\ChannelExtensions.cs" />
+    <Compile Include="Utils\Net.cs" />
+    <Compile Include="Utils\ShellApi.cs" />
+    <Compile Include="Utils\Shell\IImageList.cs" />
+    <Compile Include="Utils\Shell\IMAGEINFO.cs" />
+    <Compile Include="Utils\Shell\IMAGELISTDRAWPARAMS.cs" />
+    <Compile Include="Utils\Shell\POINT.cs" />
+    <Compile Include="Utils\Shell\RECT.cs" />
+    <Compile Include="Utils\Shell\SHFILEINFO.cs" />
+    <Compile Include="ViewModels\ImageButton.cs" />
+    <Compile Include="Common\TrafficFlow.cs" />
+    <Compile Include="ChunkViews\ChunkViewItem.cs" />
+    <Compile Include="ChunkViews\Message.cs" />
+    <Compile Include="ChunkViews\RawData.cs" />
+    <Compile Include="Rendering\FragmentViewContent.cs" />
+    <Compile Include="Rendering\FragmentViewMetrics.cs" />
+    <Compile Include="Common\ObservableRangeCollection.cs" />
+    <Compile Include="ViewModels\SessionListItem.cs" />
+    <Compile Include="SocketSettings\UDPServerSettings.cs" />
+    <Compile Include="Views\Fragments\SslHandshakeView.xaml.cs">
+      <DependentUpon>SslHandshakeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NewCertificate.xaml.cs">
+      <DependentUpon>NewCertificate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SocketSettings\Client.xaml.cs">
+      <DependentUpon>Client.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SocketSettings\Listener.xaml.cs">
+      <DependentUpon>Listener.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SocketSettings\Rewrite.xaml.cs">
+      <DependentUpon>Rewrite.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SocketSettings\UDPClient.xaml.cs">
+      <DependentUpon>UDPClient.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Fragments\ConnectionView.xaml.cs">
+      <DependentUpon>ConnectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Fragments\MessageView.xaml.cs">
+      <DependentUpon>MessageView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NewConnection.xaml.cs">
+      <DependentUpon>NewConnection.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SocketSettings\UDPServer.xaml.cs">
+      <DependentUpon>UDPServer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SslHandshakeDetails.xaml.cs">
+      <DependentUpon>SslHandshakeDetails.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Controls\CrispImage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\ChunkView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SessionListView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SearchTextBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\TreeToggleButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Delete.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Connecting.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Connect.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Adapter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Disconnect.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Forward.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Certificate.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\GearBlack.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Close.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\HintIcon.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Invalid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\LockInvalid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\LockValid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Trash.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Valid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Run.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Stop.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Watermark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Star.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Save.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Go.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\OpenFolder.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Port.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Search.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Tunnel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Process.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Info.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Error.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Disconnected.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Images\Gear.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\SocketToggles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\CustomStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Misc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Brushes.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TileButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Fragments\SslHandshakeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NewCertificate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SocketSettings\Client.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SocketSettings\Listener.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SocketSettings\Rewrite.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SocketSettings\UDPClient.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Fragments\ConnectionView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controls\ChunkView.cs" />
+    <Compile Include="Common\BindableBase.cs" />
+    <Compile Include="Rendering\DrawingFragment.cs" />
+    <Compile Include="Rendering\Fragment.cs" />
+    <Compile Include="Rendering\FragmentLayer.cs" />
+    <Compile Include="Rendering\FragmentView.cs" />
+    <Compile Include="Rendering\FilledFragment.cs" />
+    <Compile Include="Rendering\TextFragment.cs" />
+    <Compile Include="Rendering\VisualPool.cs" />
+    <Compile Include="Utils\VisualExtensions.cs" />
+    <Compile Include="Views\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="Views\Fragments\MessageView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NewConnection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SocketSettings\UDPServer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SslHandshakeDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="App.manifest" />
+    <None Include="Resources\port_numbers.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Connect_32x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Gear_32x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Tunnel_32x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Port_32x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Process_32x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Search_20x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="AppIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\netprobe32.dll" />
+    <None Include="Resources\netprobe64.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Disconnected_32x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Connect_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\OpenFolder_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Port_20x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Connect_20x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Help_16x.png" />
+    <Resource Include="Images\Help_24x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Process_20x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Watermark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="CERTENROLLLib">
+      <Guid>{728AB348-217D-11DA-B2A4-000E7BBB2B09}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Edit_16x.png" />
+    <Resource Include="Images\Edit_20x.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

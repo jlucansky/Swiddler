@@ -1,0 +1,16 @@
+﻿<Viewbox Width="32" Height="32" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <Rectangle Width="32" Height="32">
+    <Rectangle.Fill>
+      <DrawingBrush>
+        <DrawingBrush.Drawing>
+          <DrawingGroup>
+			<GeometryDrawing Brush="Transparent" Geometry="F1 M -1.27157e-006,42.6667L 42.6667,42.6667L 42.6667,0L -1.27157e-006,0L -1.27157e-006,42.6667 Z "/>
+			<GeometryDrawing Brush="#FFF6F6F6" Geometry="F1 M 41.3333,4L 41.3333,30.6667L 34.6667,30.6667L 34.6667,36L 30.6667,36L 30.6667,40L 12,40L 12,36L 8,36L 8,30.6667L 1.33333,30.6667L 1.33333,4"/>
+			<GeometryDrawing Brush="#FFFFFFFF" Geometry="F1 M 37.3333,13.3333L 5.33333,13.3333L 5.33333,8L 37.3333,8L 37.3333,13.3333 Z "/>
+			<GeometryDrawing Brush="#FF3F48CC" Geometry="F1 M 33.3333,13.3333L 36,13.3333L 36,8L 33.3333,8M 28,13.3333L 30.6667,13.3333L 30.6667,8L 28,8M 22.6667,13.3333L 25.3333,13.3333L 25.3333,8L 22.6667,8M 17.3333,13.3333L 20,13.3333L 20,8L 17.3333,8M 12,13.3333L 14.6667,13.3333L 14.6667,8L 12,8M 6.66667,13.3333L 9.33333,13.3333L 9.33333,8L 6.66667,8M 38.6667,6.66933L 38.6347,28L 32,28L 32,33.3333L 28,33.3333L 28,37.3333L 14.6667,37.3333L 14.6667,33.3333L 10.6667,33.3333L 10.6667,28L 4,28L 4,6.66666L 38.6667,6.66933 Z "/>
+          </DrawingGroup>
+        </DrawingBrush.Drawing>
+      </DrawingBrush>
+    </Rectangle.Fill>
+  </Rectangle>
+</Viewbox>
