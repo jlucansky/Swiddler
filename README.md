@@ -1,9 +1,8 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/jlucansky/Swiddler/master/Images/logo.png" height="192">
 </p>
-<p align="center">
-  TCP/UDP debugging tool
-</p>
+
+# TCP/UDP debugging tool
 
 ## Features
 ### Capture & Inspect
