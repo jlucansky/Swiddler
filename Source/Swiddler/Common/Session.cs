@@ -6,6 +6,8 @@ using Swiddler.SocketSettings;
 using Swiddler.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -43,9 +45,12 @@ namespace Swiddler.Common
 
         public StorageHandle Storage { get; private set; }
 
+        public string SettingsFileName { get; set; }
+
         public ServerSettingsBase ServerSettings { get; set; }
         public ClientSettingsBase ClientSettings { get; set; }
         public RewriteRule[] Rewrites { get; set; }
+        public SnifferSettings Sniffer { get; set; }
         public Injector Injector { get; set; } // TODO: MonitorSettings
 
         public SessionChannel SessionChannel { get; } // input/output to FragmentView
@@ -141,6 +146,10 @@ namespace Swiddler.Common
                 {
                     StartMonitor();
                 }
+                else if (Sniffer != null)
+                {
+                    StartSniffer();
+                }
 
                 StartChannels();
 
@@ -152,6 +161,27 @@ namespace Swiddler.Common
                 if (string.IsNullOrEmpty(Name ?? nameWhenStopped)) nameWhenStopped = "Error";
                 HandleChannelError(null, ex);
             }
+        }
+
+        private void StartSniffer()
+        {
+            var settings = Sniffer;
+
+            var localIP = IPAddress.Parse(settings.InterfaceAddress);
+
+            Name = $"Sniffing at {localIP}";
+
+            WriteMessage("Starting network sniffer at " + localIP);
+
+            var sniffer = new SnifferChannel(this)
+            {
+                LocalAddress = localIP,
+                CaptureFilter = settings.CaptureFilter.Select(x => x.ToTuple()).ToArray()
+            };
+
+            ServerChannel = sniffer;
+
+            shouldStopChildren = false;
         }
 
         private void StartServer()
@@ -303,7 +333,7 @@ namespace Swiddler.Common
             }
             else
             {
-                Name = $":{localEP.Port} -> {targetEP}";
+                Name = $":{localEP.Port} > {targetEP}";
                 nameWhenStopped = null;
                 ResolveProcessIdAsync(targetEP);
                 if (!SessionChannel.Observers.Contains(ClientChannel)) // broadcast/multicast is oneway
@@ -504,5 +534,23 @@ namespace Swiddler.Common
             return obj;
         }
 
+        public bool StartAsAdmin()
+        {
+            if (!string.IsNullOrEmpty(SettingsFileName) && File.Exists(SettingsFileName))
+            {
+                using (Process proc = new Process())
+                {
+                    proc.StartInfo.FileName = System.Reflection.Assembly.GetEntryAssembly().GetLocalPath();
+                    proc.StartInfo.Arguments = $"-settings \"{SettingsFileName}\"";
+                    proc.StartInfo.UseShellExecute = true;
+                    proc.StartInfo.Verb = "runas";
+                    proc.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+                    proc.Start();
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Swiddler.Commands;
 using Swiddler.Common;
+using Swiddler.DataChunks;
 using Swiddler.Serialization;
 using Swiddler.Utils;
 using Swiddler.ViewModels;
@@ -113,6 +114,48 @@ namespace Swiddler.Views
             }
         }
 
+        // TODO: prec
+#if DEBUG
+        private void Log(string message)
+        {
+            //chunkView.CurrentSession.Logs.Add(new RawData() { Data = Encoding.Default.GetBytes(message), Flow = TrafficFlow.Inbound });
+
+            /*
+            chunkView.CurrentSession.Logs.Add(new Message() { Text = "1 longa sdlkjsdflkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
+            chunkView.CurrentSession.Logs.Add(new Message() { Text = "2 longa sdlkjsdflkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
+            chunkView.CurrentSession.Logs.Add(new Message() { Text = "3 longa sdlkjsdflkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
+            chunkView.CurrentSession.Logs.Add(new Message() { Text = "4 longa sdlkjsdflkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
+            chunkView.CurrentSession.Logs.Add(new Message() { Text = DateTime.Now.Ticks + "" });
+            chunkView.CurrentSession.Logs.Add(new Message() { Text = "5 longa sdlkjsdfldkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
+            */
+
+            chunkView.CurrentSession.Storage.Write(new Packet()
+            {
+                Flow = TrafficFlow.Outbound,
+                Payload = Encoding.Default.GetBytes("\nSTART\nrfeoiewoi=éiľršonľf\néiľršonľf\néiľršonľf\n\n\n\néiľršonľf\néiľršonľf\néiľršonľf\n")
+            });
+
+            chunkView.CurrentSession.Storage.Write(new Packet()
+            {
+                Flow = TrafficFlow.Outbound,
+                Payload = Encoding.Default.GetBytes("\n\n")
+            });
+
+            chunkView.CurrentSession.Storage.Write(new Packet()
+            {
+                Flow = TrafficFlow.Inbound,
+                Payload = Encoding.Default.GetBytes("\nWWWWWWWWWaaaaaaaabbbbbbbbb77778\n\n\n\n\n613531aaaaxWWWWWWWWWaaaaaaaabbbbbbbbb77778613531aaaax")
+            });
+
+            chunkView.CurrentSession.Storage.Write(new Packet()
+            {
+                Flow = TrafficFlow.Outbound,
+                Payload = Encoding.Default.GetBytes("fwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqer")
+            });
+
+        }
+#endif
+
         private void InputText_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return && e.KeyboardDevice.Modifiers.HasFlag(ModifierKeys.Control) &&
@@ -156,7 +199,6 @@ namespace Swiddler.Views
 
         private void Open_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)

@@ -11,6 +11,7 @@ namespace Swiddler.MarkupExtensions
     public class GroupedIPAddresses : MarkupExtension
     {
         public AddressFamily? AddressFamily { get; set; }
+        public bool Loopback { get; set; } = true;
 
         class IPAddressGroupDescription : GroupDescription
         {
@@ -26,7 +27,7 @@ namespace Swiddler.MarkupExtensions
         {
             var addrViewSource = new CollectionViewSource();
             addrViewSource.GroupDescriptions.Add(new IPAddressGroupDescription());
-            addrViewSource.Source = AddressFamily.HasValue ? IPAddressItem.GetAll(AddressFamily.Value) : IPAddressItem.GetAll();
+            addrViewSource.Source = AddressFamily.HasValue ? IPAddressItem.GetAll(AddressFamily.Value, Loopback) : IPAddressItem.GetAll();
             return addrViewSource.View;
         }
 

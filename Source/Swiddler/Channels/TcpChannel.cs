@@ -118,7 +118,7 @@ namespace Swiddler.Channels
                 HandleError(ex);
             }
         }
-        
+
         public virtual void Dispose()
         {
             NetworkStream?.Dispose();

@@ -118,6 +118,8 @@ namespace Swiddler.Views
             {
                 Result = ConnectionSettings.CreateSession();
                 ConnectionSettings.SaveRecent();
+                if (Result != null)
+                    Result.SettingsFileName = ConnectionSettings.FileName;
                 Close();
             }
             catch (Exception ex)
@@ -212,6 +214,7 @@ namespace Swiddler.Views
             if (context is ServerSettingsBase) ConnectionSettings.ServerChecked = false;
             if (context is ClientSettingsBase) ConnectionSettings.ClientChecked = false;
             if (context is RewriteSettings r) ConnectionSettings.RemoveRewrite(r);
+            if (context is SnifferSettings) ConnectionSettings.SnifferChecked = false;
         }
 
         private void ClipboardLink_Click(object sender, RoutedEventArgs e)

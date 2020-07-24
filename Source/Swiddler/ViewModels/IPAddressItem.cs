@@ -25,13 +25,23 @@ namespace Swiddler.ViewModels
 
         public override string ToString() => IPAddress.ToString();
 
-        public static List<IPAddressItem> GetAll(bool mapToIPv6 = false)
+        public static List<IPAddressItem> GetAll(bool mapToIPv6 = false, bool loopback = true)
         {
-            return new[] {
-                new IPAddressItem() { IPAddress = IPAddress.Any, IsAny = true, InterfaceName="Any" },
-                new IPAddressItem() { IPAddress = IPAddress.IPv6Any, IsAny = true, InterfaceName="Any" },
+            IPAddressItem[] items;
+
+            if (loopback)
+            {
+                items = new[] {
+                    new IPAddressItem() { IPAddress = IPAddress.Any, IsAny = true, InterfaceName = "Any" },
+                    new IPAddressItem() { IPAddress = IPAddress.IPv6Any, IsAny = true, InterfaceName = "Any" }
+                };
             }
-            .Concat(NetworkInterface.GetAllNetworkInterfaces()
+            else
+            {
+                items = new IPAddressItem[0];
+            }
+
+            return items.Concat(NetworkInterface.GetAllNetworkInterfaces()
                 .Select(iface => iface.GetIPProperties().UnicastAddresses
                 .Select(adr => new IPAddressItem()
                 {
@@ -46,9 +56,9 @@ namespace Swiddler.ViewModels
                 .ToList();
         }
 
-        public static List<IPAddressItem> GetAll(AddressFamily family)
+        public static List<IPAddressItem> GetAll(AddressFamily family, bool loopback)
         {
-            return GetAll(family == AddressFamily.InterNetworkV6).Where(x => x.IPAddress.AddressFamily == family).ToList();
+            return GetAll(family == AddressFamily.InterNetworkV6, loopback).Where(x => x.IPAddress.AddressFamily == family && (loopback || !x.IsLoopback)).ToList();
         }
 
         public override bool Equals(object obj)

@@ -20,6 +20,7 @@ namespace Swiddler.ViewModels
             new QuickActionItem(QuickActionTemplate.ClientTCPv4),
             new QuickActionItem(QuickActionTemplate.ServerTCPv4),
             new QuickActionItem(QuickActionTemplate.TunnelTCPv4),
+            new QuickActionItem(QuickActionTemplate.Sniffer),
             //new QuickActionItem(QuickActionTemplate.Monitor),
         };
 
@@ -43,6 +44,15 @@ namespace Swiddler.ViewModels
                     Icon = "Tunnel";
                     Description = "Tunnel (client & server)";
                     Builder = cs => { cs.TCPChecked = true; cs.ClientChecked = true; cs.ServerChecked = true; };
+                    break;
+                case QuickActionTemplate.Sniffer:
+                    Icon = "Eye";
+                    Description = "Network sniffer";
+                    Builder = cs =>
+                    {
+                        cs.SnifferChecked = true;
+                        cs.Sniffer.CaptureFilter.Add(new SocketSettings.SnifferSettings.CaptureFilterItem() { Port = 80, Protocol = SocketSettings.SnifferSettings.CaptureProtocol.TCP });
+                    };
                     break;
                 case QuickActionTemplate.Monitor:
                     Icon = "Process";
@@ -77,6 +87,7 @@ namespace Swiddler.ViewModels
         ClientTCPv4,
         ServerTCPv4,
         TunnelTCPv4,
+        Sniffer,
         Monitor
     }
 

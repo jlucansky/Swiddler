@@ -21,12 +21,15 @@ namespace Swiddler.ViewModels
         public TCPClientSettings TCPClient { get; set; }
         public UDPClientSettings UDPClient { get; set; }
         public UDPServerSettings UDPServer { get; set; }
+        public SnifferSettings Sniffer { get; set; }
+
 
         // state properties must be after connection settings instances to preserve proper deserialization order
 
-        bool _TCPChecked, _UDPChecked;
+        bool _TCPChecked, _UDPChecked, _SnifferChecked;
         public bool TCPChecked { get => _TCPChecked; set { if (SetProperty(ref _TCPChecked, value)) OnTCPToggled(value); } }
         public bool UDPChecked { get => _UDPChecked; set { if (SetProperty(ref _UDPChecked, value)) OnUDPToggled(value); } }
+        public bool SnifferChecked { get => _SnifferChecked; set { if (SetProperty(ref _SnifferChecked, value)) OnSnifferToggled(value); } }
 
         bool _ClientChecked, _ServerChecked;
         public bool ClientChecked { get => _ClientChecked; set { if (SetProperty(ref _ClientChecked, value)) OnClientToggled(value); } }
@@ -45,6 +48,9 @@ namespace Swiddler.ViewModels
         bool _AnyProtocolChecked;
         [XmlIgnore] public bool AnyProtocolChecked { get => _AnyProtocolChecked; set => SetProperty(ref _AnyProtocolChecked, value); }
 
+        bool _CanSelectProtocol = true;
+        [XmlIgnore] public bool CanSelectProtocol { get => _CanSelectProtocol; set => SetProperty(ref _CanSelectProtocol, value); }
+
         [XmlIgnore] public DateTime CreatedAt { get; private set; } = DateTime.Now;
         [XmlIgnore] public string FileName { get; private set; }
 
@@ -52,6 +58,7 @@ namespace Swiddler.ViewModels
         [XmlIgnore] public bool IsDirty { get; private set; }
 
         [XmlIgnore] public ObservableCollection<SettingsBase> Settings { get; } = new ObservableCollection<SettingsBase>();
+
 
         public RewriteSettings[] Rewrites
         {
@@ -76,6 +83,7 @@ namespace Swiddler.ViewModels
             if (TCPClient == null) TCPClient = new TCPClientSettings();
             if (UDPClient == null) UDPClient = new UDPClientSettings();
             if (UDPServer == null) UDPServer = new UDPServerSettings();
+            if (Sniffer == null) Sniffer = new SnifferSettings();
         }
 
         private void Init() // call after all properties are sets
@@ -87,6 +95,7 @@ namespace Swiddler.ViewModels
             TCPServer.PropertyChanged += MakeDirty;
             UDPClient.PropertyChanged += MakeDirty;
             UDPServer.PropertyChanged += MakeDirty;
+            Sniffer.PropertyChanged += MakeDirty;
 
             TCPClient.DualModeChanged += Client_DualModeChanged;
             TCPServer.DualModeChanged += Server_DualModeChanged;
@@ -161,10 +170,35 @@ namespace Swiddler.ViewModels
             }
             UDPToggleLocked = value;
             AnyProtocolChecked = _TCPChecked || _UDPChecked;
+        }    
+        
+        protected void OnSnifferToggled(bool value)
+        {
+            if (value)
+            {
+                TCPChecked = false;
+                UDPChecked = false;
+                ClientChecked = false;
+                ServerChecked = false;
+
+                Settings.Clear();
+                Settings.Add(Sniffer);
+
+                AnyProtocolChecked = false;
+            }
+            else
+            {
+                Settings.Remove(Sniffer);
+            }
+
+            CanSelectProtocol = !SnifferChecked;
         }
 
         void ProtocolChanged() // after TCP/UDP swapped
         {
+            if (SnifferChecked)
+                SnifferChecked = false;
+
             Settings.Remove(TCPClient);
             Settings.Remove(TCPServer);
             Settings.Remove(UDPClient);
@@ -298,6 +332,7 @@ namespace Swiddler.ViewModels
                 ClientSettings = ClientChecked ? ClientSettings : null,
                 ServerSettings = ServerChecked ? ServerSettings : null,
                 Rewrites = RewriteSettings.GetRewriteRules(Rewrites),
+                Sniffer = SnifferChecked ? Sniffer : null,
             };
 
             return session;
@@ -358,7 +393,7 @@ namespace Swiddler.ViewModels
 
         void Validate()
         {
-            if (!Settings.Any(x => x is ClientSettingsBase || x is ServerSettingsBase))
+            if (!Settings.Any(x => x is ClientSettingsBase || x is ServerSettingsBase || x is SnifferSettings))
                 throw new Exception("No socket to create!");
 
             if (ServerChecked)
@@ -417,6 +452,21 @@ namespace Swiddler.ViewModels
                         if (TCPClient.GetSslProtocols() ==  System.Security.Authentication.SslProtocols.None)
                             throw new ValueException(null, "No client SSL/TLS protocol selected.");
                     }
+                }
+            }
+            if (SnifferChecked)
+            {
+                ValidateHostname(Sniffer.InterfaceAddress, nameof(Sniffer.InterfaceAddress), allowOnlyIpAddress: true, allowOnlyIPv4: true);
+                foreach (var filter in Sniffer.CaptureFilter)
+                {
+                    if (!string.IsNullOrEmpty(filter.IPAddress))
+                    {
+                        if (!IPAddress.TryParse(filter.IPAddress, out var ip) || ip.AddressFamily != AddressFamily.InterNetwork)
+                            throw new ValueException(nameof(Sniffer.CaptureFilter), "Enter valid IPv4 address in capture filter.");
+                    }
+
+                    if (filter.Port != null)
+                        ValidatePortRange(filter.Port, nameof(Sniffer.CaptureFilter), true);
                 }
             }
 
@@ -607,11 +657,13 @@ namespace Swiddler.ViewModels
                 TCPServer = (TCPServerSettings)(template.TCPChecked && template.ServerChecked ? template : this).TCPServer.Clone(),
                 UDPClient = (UDPClientSettings)(template.UDPChecked && template.ClientChecked ? template : this).UDPClient.Clone(),
                 UDPServer = (UDPServerSettings)(template.UDPChecked && template.ServerChecked ? template : this).UDPServer.Clone(),
+                Sniffer = (SnifferSettings)template.Sniffer.Clone(),
 
                 TCPChecked = template.TCPChecked,
                 UDPChecked = template.UDPChecked,
                 ClientChecked = template.ClientChecked,
                 ServerChecked = template.ServerChecked,
+                SnifferChecked = template.SnifferChecked,
                 Rewrites = template.Rewrites.Select(x => (RewriteSettings)x.Clone()).ToArray(),
             };
 
@@ -632,12 +684,14 @@ namespace Swiddler.ViewModels
                 TCPClient = TCPClientSettings.DesignInstance;
                 UDPClient = UDPClientSettings.DesignInstance;
                 UDPServer = UDPServerSettings.DesignInstance;
+                Sniffer = SnifferSettings.DesignInstance;
 
                 TCPChecked = true;
                 ClientChecked = true;
 
                 Settings.Clear();
                 // add every socket in design time to see all of them
+                Settings.Add(Sniffer);
                 Settings.Add(TCPServer);
                 Settings.Add(TCPClient);
                 Settings.Add(UDPServer);

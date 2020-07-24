@@ -39,6 +39,12 @@ namespace Swiddler.ViewModels
                     ":" + cs.ServerSettings.Port + " > " +
                     cs.ClientSettings.TargetHost + ":" + cs.ClientSettings.TargetPort;
             }
+            else if (cs.SnifferChecked)
+            {
+                Icon = "Eye";
+                Caption = "Network sniffer";
+                Description = cs.Sniffer.InterfaceAddress;
+            }
             else
             {
                 throw new NotImplementedException();

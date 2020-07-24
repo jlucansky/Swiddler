@@ -157,8 +157,7 @@ namespace Swiddler.Common
 
         static string GetExecutingDirectoryName()
         {
-            var location = new Uri(Assembly.GetEntryAssembly().GetName().CodeBase);
-            return new FileInfo(location.LocalPath).Directory.FullName;
+            return new FileInfo(Assembly.GetEntryAssembly().GetLocalPath()).Directory.FullName;
         }
 
         string GetVersion()

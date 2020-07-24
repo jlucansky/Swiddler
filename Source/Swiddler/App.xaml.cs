@@ -3,11 +3,10 @@ using Swiddler.Utils;
 using Swiddler.ViewModels;
 using Swiddler.Views;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Swiddler
@@ -36,9 +35,24 @@ namespace Swiddler
 
             EnsureUserFolders();
 
-            if (e.Args.FirstOrDefault()?.Equals("-nonew", StringComparison.OrdinalIgnoreCase) == true)
+            Task.Run(() => Firewall.Instance.GrantAuthorizationToSelf());
+
+            var firstArg = e.Args.FirstOrDefault();
+
+            if (firstArg?.Equals("-nonew", StringComparison.OrdinalIgnoreCase) == true)
             {
                 new MainWindow().Show();
+            }
+            else if (firstArg?.Equals("-settings", StringComparison.OrdinalIgnoreCase) == true && e.Args.Length == 2)
+            {
+                var cs = ConnectionSettings.Deserialize(File.ReadAllBytes(e.Args[1]));
+                var session = cs.CreateSession();
+                if (session != null)
+                {
+                    var mainWindow = new MainWindow();
+                    mainWindow.Show();
+                    mainWindow.AddSessionAndStart(session);
+                }
             }
             else
             {
