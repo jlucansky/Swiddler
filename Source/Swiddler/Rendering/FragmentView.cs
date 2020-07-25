@@ -1,5 +1,6 @@
 ﻿using Swiddler.Common;
 using Swiddler.IO;
+using Swiddler.Utils.RtfWriter;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -77,7 +78,7 @@ namespace Swiddler.Rendering
                 Session = CurrentSession,
                 Metrics = new FragmentViewMetrics()
                 {
-                    Encoding = Encoding.Default,
+                    Encoding = Encoding.GetEncoding(437), // IBM 437 (OEM-US)
                     Typeface = new Typeface("Lucida Console"),
                     FontSize = 14,
                 }
@@ -325,9 +326,17 @@ namespace Swiddler.Rendering
                 {
                     using (var stream = new MemoryStream())
                     {
-                        var transfer = new DataTransfer(CurrentSession.Storage, stream);
+                        var rtf = new RtfDocument();
+                        var target = new CompositeTransferTarget(new StreamTransferTarget(stream), new RtfTransferTarget(rtf, Metrics.Encoding));
+                        
+                        var transfer = new DataTransfer(CurrentSession.Storage, target);
                         transfer.CopySelection(Content.SelectionStart, Content.SelectionEnd);
-                        Clipboard.SetDataObject(Metrics.Encoding.GetString(stream.ToArray()), true);
+
+                        DataObject data = new DataObject();
+                        data.SetData(DataFormats.Text, Metrics.Encoding.GetString(stream.ToArray()));
+                        data.SetData(DataFormats.Rtf, rtf.render());
+
+                        Clipboard.SetDataObject(data);
                     }
                 }
                 catch (Exception ex)

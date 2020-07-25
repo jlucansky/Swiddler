@@ -57,6 +57,14 @@ namespace Swiddler.Rendering
             FontChanged();
         }
 
+        static readonly byte[] _sweep = Enumerable.Range(32, 256-32).Select(x => (byte)x).ToArray();
+        static readonly char[] _controlChars = new ushort[] { // Code Page 437 to Unicode mapping
+            0x0000, 0x263A, 0x263B, 0x2665, 0x2666, 0x2663, 0x2660, 0x2022,
+            0x25D8, 0x0020, 0x25D9, 0x2642, 0x2640, 0x266A, 0x266B, 0x263C, 
+            0x25BA, 0x25C4, 0x2195, 0x203C, 0x00B6, 0x00A7, 0x25AC, 0x21A8,
+            0x2191, 0x2193, 0x2192, 0x2190, 0x221F, 0x2194, 0x25B2, 0x25BC }
+        .Select(x => (char)x).ToArray();
+
         private GlyphTypeface _GlyphTypeface;
         public GlyphTypeface GlyphTypeface
         {
@@ -66,8 +74,24 @@ namespace Swiddler.Rendering
                     if (!Metrics.Typeface.TryGetGlyphTypeface(out _GlyphTypeface))
                         throw new NotSupportedException();
 
+                var map = _GlyphTypeface.CharacterToGlyphMap;
+                _glyphIndices = _controlChars.Concat(Metrics.Encoding.GetChars(_sweep)).Select(x => { map.TryGetValue(x, out var val); return val; }).ToArray();
+
                 return _GlyphTypeface;
             }
+        }
+
+        ushort[] _glyphIndices;
+
+        /// <summary>
+        /// Convert bytes to glyph indices considering current GlyphTypeface and Encoding
+        /// </summary>
+        public ushort[] GetGlyphIndices(byte[] data, int start, int count)
+        {
+            var result = new ushort[count];
+            for (int i = 0; i < count; i++)
+                result[i] = _glyphIndices[data[start + i]];
+            return result;
         }
 
         void ComputeCharWidth()

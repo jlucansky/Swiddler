@@ -20,20 +20,15 @@ namespace Swiddler.Rendering
             if (Length == 0)
                 return;
 
-            ushort[] glyphIndexes = new ushort[Length];
-            double[] advanceWidths = new double[Length];
-
             GlyphTypeface glyphTypeface = View.Content.GlyphTypeface;
+
+            var advanceWidths = new double[Length];
+            var glyphIndices = View.Content.GetGlyphIndices(Data, Offset, Length);
+
             double charWidth = View.Content.CharWidth;
             double fontSize = View.Content.LineHeight - 2; // keep padding
 
-            for (int n = 0; n < Length; n++)
-            {
-                if (glyphTypeface.CharacterToGlyphMap.TryGetValue(Data[Offset + n], out ushort glyphIndex))
-                    glyphIndexes[n] = glyphIndex;
-
-                advanceWidths[n] = charWidth;
-            }
+            for (int n = 0; n < Length; n++) advanceWidths[n] = charWidth;
 
             var baseline = new Point(0, View.Content.SnapToPixelsY(glyphTypeface.Baseline * fontSize + 1.5, ceiling: true));
 
@@ -41,7 +36,7 @@ namespace Swiddler.Rendering
                             bidiLevel: 0,
                             isSideways: false,
                             renderingEmSize: fontSize,
-                            glyphIndices: glyphIndexes,
+                            glyphIndices: glyphIndices,
                             baselineOrigin: baseline,
                             advanceWidths: advanceWidths,
                             glyphOffsets: null,

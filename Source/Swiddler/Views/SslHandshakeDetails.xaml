@@ -17,7 +17,7 @@
         WindowStyle="SingleBorderWindow"
         ResizeMode="CanResize"
         Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
-        Height="710" Width="900"
+        Height="750" Width="900"
         ShowInTaskbar="False" KeyDown="Window_KeyDown">
     
     <!--<Window.Resources>
@@ -64,14 +64,18 @@
                             <GridViewColumn Header="Usage" Width="Auto" >
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Type}"/>
+                                        <Grid Height="22">
+                                            <TextBlock Text="{Binding Type}" VerticalAlignment="Center" />
+                                        </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="Expiration" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding NotAfter}"/>
+                                        <Grid Height="22">
+                                            <TextBlock Text="{Binding NotAfter}" VerticalAlignment="Center" />
+                                        </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -134,7 +138,7 @@
 
         </StackPanel>
         <!--<Label Margin="0 8 0 0" DockPanel.Dock="Top">Secure channel properties</Label>-->
-        <TextBox Margin="0 8 0 0" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="13"
+        <TextBox Margin="0 8 0 0" TextWrapping="NoWrap" FontFamily="Lucida Console" FontSize="13"
                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                  IsReadOnly="True" IsReadOnlyCaretVisible="True"
                  Text="{Binding HandshakeText, Mode=OneTime}"/>

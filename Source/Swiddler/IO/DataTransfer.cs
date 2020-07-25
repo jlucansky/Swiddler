@@ -19,9 +19,11 @@ namespace Swiddler.IO
 
 
         readonly StorageHandle storage;
-        readonly Stream target;
+        readonly IDataTransferTarget target;
 
-        public DataTransfer(StorageHandle storage, Stream target)
+        public DataTransfer(StorageHandle storage, Stream target) : this (storage, new StreamTransferTarget(target)) { }
+
+        public DataTransfer(StorageHandle storage, IDataTransferTarget target)
         {
             this.storage = storage;
             this.target = target;
@@ -41,7 +43,7 @@ namespace Swiddler.IO
             while (reader.CurrentChunk != null && null != (data = payload(reader.CurrentChunk)))
             {
                 if (data.Length > 0)
-                    target.Write(data, 0, data.Length);
+                    target.Write(reader.CurrentChunk, data);
 
                 reader.Read();
                 CancellationToken.ThrowIfCancellationRequested();

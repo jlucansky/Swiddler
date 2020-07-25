@@ -58,7 +58,7 @@
                         </Grid.Resources>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="270"/>
+                            <ColumnDefinition Width="320"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -102,7 +102,7 @@
                         <Label Grid.Row="3" Grid.Column="0" Target="{Binding ElementName=gridSAN}">Alternative Names (SAN)</Label>
                         <DataGrid x:Name="gridSAN" Height="75" Grid.Row="3" Grid.Column="1" Margin="0 4" ItemsSource="{Binding SANList}" Style="{StaticResource SimpleDataGrid}">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Width="60" Header="Type" CanUserSort="False">
+                                <DataGridTemplateColumn Width="80" Header="Type" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Margin="6 0 0 0" Text="{Binding Type}" VerticalAlignment="Center"/>

@@ -71,6 +71,15 @@ namespace Swiddler.Channels
             public Mediator(Session session) : base(session) { }
             protected override void OnReceiveNotification(Packet packet) => throw new NotImplementedException();
             public void Send(Packet packet) => NotifyObservers(packet); // write to session UI
+
+            public void Close(string reason)
+            {
+                HandleError(new Exception(reason));
+            }
+            public void ClosingDueFlag(string flag, IPEndPoint source)
+            {
+                Close($"Closing due to {flag} flag sent from {source}");
+            }
         }
 
         public SnifferChannel(Session session) : base(session) { }
@@ -118,12 +127,15 @@ namespace Swiddler.Channels
 
         void StartAsAdmin()
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            if (!string.IsNullOrEmpty(Session.SettingsFileName))
             {
-                if (MessageBox.Show(
-                    "You don’t have permission to create raw sockets.\n\nDo you want to launch Swiddler as Administrator?",
-                    "Access Denied", MessageBoxButton.YesNo, MessageBoxImage.Exclamation) == MessageBoxResult.Yes) Session.StartAsAdmin();
-            }));
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (MessageBox.Show(
+                        "You don’t have permission to create raw sockets.\n\nDo you want to launch Swiddler as Administrator?",
+                        "Access Denied", MessageBoxButton.YesNo, MessageBoxImage.Exclamation) == MessageBoxResult.Yes) Session.StartAsAdmin();
+                }));
+            }
         }
 
         void BeginReceive()
@@ -172,10 +184,8 @@ namespace Swiddler.Channels
 
                             mediator.Send(packet);
 
-                            if (raw.Flags.HasFlag(TCPFlags.RST) || raw.Flags.HasFlag(TCPFlags.FIN))
-                            {
-                                mediator.Session.Stop();
-                            }
+                            if (raw.Flags.HasFlag(TCPFlags.RST)) mediator.ClosingDueFlag("RST", raw.Source);
+                            if (raw.Flags.HasFlag(TCPFlags.FIN)) mediator.ClosingDueFlag("FIN", raw.Source);
                         }
                     }
                 }

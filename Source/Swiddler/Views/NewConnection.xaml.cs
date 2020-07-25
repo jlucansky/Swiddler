@@ -44,12 +44,12 @@ namespace Swiddler.Views
             }
             else
             {
-                Width = 700; 
+                Width = 700;
                 Height = 500;
             }
 
             var history = ConnectionSettings.GetHistory();
-            var firstConn = history.FirstOrDefault();
+            var firstConn = history.FirstOrDefault()?.Copy();
 
             clipboardConnectionSettings = TryCreateFromClipboard(firstConn);
             ConnectionSettings = firstConn ?? QuickActionItem.DefaultTemplates[0].GetConnectionSettings(null);

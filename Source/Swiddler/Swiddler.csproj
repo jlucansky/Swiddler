@@ -89,6 +89,7 @@
     <Compile Include="Converters\CertificateValidityConverter.cs" />
     <Compile Include="Converters\IntEnumConverter.cs" />
     <Compile Include="Converters\AssignableTypeConverter.cs" />
+    <Compile Include="IO\IDataTransferTarget.cs" />
     <Compile Include="IO\SyncedFileStream.cs" />
     <Compile Include="Common\ValueException.cs" />
     <Compile Include="Controls\ComboBoxEx.cs" />
@@ -149,10 +150,16 @@
     <Compile Include="Utils\ControlExtensions.cs" />
     <Compile Include="Utils\DateTimeExtensions.cs" />
     <Compile Include="Utils\DependencyObjectExtensions.cs" />
-    <Compile Include="Utils\EncodingExtensions.cs" />
     <Compile Include="Utils\Firewall.cs" />
     <Compile Include="Utils\ImagingExtensions.cs" />
     <Compile Include="Common\Injector.cs" />
+    <Compile Include="Utils\RtfWriter\RtfAbstract.cs" />
+    <Compile Include="Utils\RtfWriter\RtfBasics.cs" />
+    <Compile Include="Utils\RtfWriter\RtfBlockList.cs" />
+    <Compile Include="Utils\RtfWriter\RtfCharFormat.cs" />
+    <Compile Include="Utils\RtfWriter\RtfDocument.cs" />
+    <Compile Include="Utils\RtfWriter\RtfParagraph.cs" />
+    <Compile Include="Utils\RtfWriter\RtfUtility.cs" />
     <Compile Include="Utils\TaskbarProgress.cs" />
     <Compile Include="Utils\WindowExtensions.cs" />
     <Compile Include="SocketSettings\SettingsBase.cs" />

@@ -169,6 +169,7 @@
                 
                 <Grid Grid.Row="2">
                     <TextBox Name="inputText" BorderBrush="{x:Null}" BorderThickness="0" PreviewLostKeyboardFocus="inputText_PreviewLostKeyboardFocus"
+                     FontFamily="Lucida Console" FontSize="13"
                      TextWrapping="NoWrap"
                      AcceptsReturn="True"
                      HorizontalScrollBarVisibility="Auto"

@@ -168,7 +168,7 @@ namespace Swiddler.Views
         void Send()
         {
             string text = inputText.Text;
-            chunkView.CurrentSession?.SessionChannel.Submit(Encoding.UTF8.GetBytes(text));
+            chunkView.CurrentSession?.SessionChannel.Submit(Encoding.Default.GetBytes(text));
             inputText.Clear();
         }
 
