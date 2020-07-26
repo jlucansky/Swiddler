@@ -101,8 +101,13 @@ namespace Swiddler.Views
 
         private void SessionTree_ItemAdded(object sender, int index)
         {
-            sessionListView.SelectedIndex = index;
-            sessionListView.ScrollIntoView(sessionListView.SelectedItem);
+            var item = (SessionListItem)sessionListView.Items[index];
+
+            if (!item.Session.IsChildSession || item.Session.Parent.Children.Count == 1)
+            {
+                sessionListView.SelectedIndex = index;
+                sessionListView.ScrollIntoView(sessionListView.SelectedItem);
+            }
         }
 
         private void SessionListView_SelectionChanged(object sender, SelectionChangedEventArgs e)

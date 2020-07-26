@@ -67,7 +67,7 @@ namespace Swiddler.Channels
         private class Mediator : Channel
         {
             public ConnectionKey EP { get; set; }
-            public bool IsServer { get; set; }
+            public bool IsServer { get; set; } // local EP is server
             public Mediator(Session session) : base(session) { }
             protected override void OnReceiveNotification(Packet packet) => throw new NotImplementedException();
             public void Send(Packet packet) => NotifyObservers(packet); // write to session UI
@@ -133,7 +133,10 @@ namespace Swiddler.Channels
                 {
                     if (MessageBox.Show(
                         "You don’t have permission to create raw sockets.\n\nDo you want to launch Swiddler as Administrator?",
-                        "Access Denied", MessageBoxButton.YesNo, MessageBoxImage.Exclamation) == MessageBoxResult.Yes) Session.StartAsAdmin();
+                        "Access Denied", MessageBoxButton.YesNo, MessageBoxImage.Exclamation) == MessageBoxResult.Yes)
+                    {
+                        try { Session.StartAsAdmin(); } catch  { }
+                    }
                 }));
             }
         }
@@ -207,20 +210,30 @@ namespace Swiddler.Channels
                 {
                     var child = Session.NewChildSession();
 
-                    Session.Storage.Write(new MessageData() { Text = $"New connection observed {raw.Source} -> :{raw.Destination}", Type = MessageType.Connecting });
+                    Session.Storage.Write(new MessageData() { Text = $"New connection observed {raw.Source} -> {raw.Destination}", Type = MessageType.Connecting });
 
                     mediator = new Mediator(child) { EP = ep };
 
                     string protoStr = raw.Protocol.ToString().ToUpperInvariant();
 
-                    if (raw.Destination.Address.Equals(LocalAddress))
+                    var source = raw.Source;
+                    var destination = raw.Destination;
+
+                    // can happen that SYN|ACK sniffed as a reply from server before SYN
+                    if (raw.Flags.HasFlag(TCPFlags.SYN) && raw.Flags.HasFlag(TCPFlags.ACK))
                     {
-                        child.Name = $"{raw.Source} > :{raw.Destination.Port} - {protoStr}";
+                        destination = raw.Source;
+                        source = raw.Destination;
+                    }
+
+                    if (destination.Address.Equals(LocalAddress))
+                    {
+                        child.Name = $"{source} > :{destination.Port} ({protoStr})";
                         mediator.IsServer = true; // when first packet is directed toward local IP, then local EP is probably server
                     }
                     else
                     {
-                        child.Name = $":{raw.Source.Port} > {raw.Destination} - {protoStr}";
+                        child.Name = $":{source.Port} > {destination} ({protoStr})";
                     }
 
                     mediator.Observe(child.SessionChannel); // received packets write to session Log
