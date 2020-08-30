@@ -19,6 +19,10 @@ namespace Swiddler.SocketSettings
         string _InterfaceAddress;
         public string InterfaceAddress { get => _InterfaceAddress; set => SetProperty(ref _InterfaceAddress, value); }
 
+        bool _PromiscuousMode;
+        public bool PromiscuousMode { get => _PromiscuousMode; set => SetProperty(ref _PromiscuousMode, value); }
+
+
         public ObservableCollection<CaptureFilterItem> CaptureFilter { get; set; } = new ObservableCollection<CaptureFilterItem>();
 
         public static CaptureProtocol[] CaptureProtocols { get; } = new[] { CaptureProtocol.Both, CaptureProtocol.TCP, CaptureProtocol.UDP };

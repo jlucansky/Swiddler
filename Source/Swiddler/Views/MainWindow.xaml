@@ -15,6 +15,7 @@
         Title="Swiddler"
         Height="700" Width="1200" 
         SourceInitialized="Window_SourceInitialized"
+        Loaded="Window_Loaded"
         
         b:FrameworkElement.SetDpi="True">
 
@@ -27,6 +28,10 @@
         <KeyBinding Command="{x:Static cmd:MiscCommands.QuickConnect}" Gesture="CTRL+Q" />
         <KeyBinding Command="{x:Static cmd:MiscCommands.Send}" Gesture="ALT+S" />
         <KeyBinding Command="{x:Static cmd:MiscCommands.Disconnect}" Gesture="CTRL+D" />
+        <KeyBinding Command="{x:Static cmd:MiscCommands.SelectAll}" Gesture="CTRL+A" />
+        <KeyBinding Command="{x:Static cmd:MiscCommands.GoToStart}" Gesture="Home" />
+        <KeyBinding Command="{x:Static cmd:MiscCommands.GoToEnd}" Gesture="End" />
+        <KeyBinding Command="{x:Static cmd:MiscCommands.ToggleHex}" Gesture="CTRL+H" />
     </Window.InputBindings>
 
     <DockPanel>
@@ -70,7 +75,7 @@
             <Button Click="NewConnection_Click">
                 <ViewModels:ImageButton Text="New connection..." ImageName="Connect" />
             </Button>
-            <Button ToolTip="Disconnect (Ctrl+D)" Click="Disconnect_Click">
+            <Button ToolTip="Disconnect (Ctrl+D)" Click="Disconnect_Click" IsEnabled="{Binding Properties.CanStop}">
                 <Controls:CrispImage ImageName="Stop" />
             </Button>
             <ComboBox Margin="1 0" SelectedIndex="0" Width="260" IsEditable="True" ToolTip="Quick Connect (Ctrl+Q)" Text="http://example.org" 
@@ -78,6 +83,13 @@
             <Button ToolTip="Quick Connect" Click="QuickConnect_Click">
                 <Controls:CrispImage ImageName="Run" />
             </Button>
+            <Separator />
+            <ToggleButton ToolTip="Drag &amp; drop selection to .PCAP file" IsChecked="{Binding PcapSelectionExport}">
+                <Controls:CrispImage ImageName="ExportShark" />
+            </ToggleButton>
+            <ToggleButton ToolTip="Binary input" Name="binaryInputButton" Checked="BinaryInput_Toggled" Unchecked="BinaryInput_Toggled">
+                <Controls:CrispImage ImageName="Binary" />
+            </ToggleButton>
         </ToolBar>
         <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
             <Grid.ColumnDefinitions>
@@ -86,89 +98,82 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <DockPanel>
-                <!--<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                    <Button Click="Button_Scroll" HorizontalAlignment="Left" Padding="10 5" Content="Scroll"/>
-                    <Button Click="Button_NewLog" HorizontalAlignment="Left" Padding="10 5" Content="Log"/>
-                    <Button Click="Button_Connect"  HorizontalAlignment="Left" Padding="10 5" Content="Connect"/>
-                    <Button Click="Button_Listen" HorizontalAlignment="Left" Padding="10 5" Content="Listen"/>
-                    <Button Click="Button_Inject" HorizontalAlignment="Left" Padding="10 5" Content="Inject"/>
-                    <Button Click="Button_Stop" HorizontalAlignment="Left" Padding="10 5" Content="Stop"/>
-                </StackPanel>-->
-                <Controls:SessionListView BorderThickness="0" x:Name="sessionListView">
-                    <ListView.View>
-                        <GridView ColumnHeaderContainerStyle="{StaticResource FlatListViewHeader}">
-                            <GridViewColumn Header="Connection" Width="200" >
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" 
-                                                Margin="{Binding IndentLevel, Mode=OneWay, Converter={StaticResource TreeIndentConverter}, ConverterParameter={StaticResource TreeIndent}}">
-                                            <Controls:TreeToggleButton x:Name="ToggleButton" IsChecked="{Binding IsExpanded, Mode=OneWay}" Visibility="Hidden"/>
-                                            <TextBlock Text="{Binding Title, Mode=OneWay}" Margin="2 0 0 0" />
-                                        </StackPanel>
-                                        <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding HasToggleButton, Mode=OneWay}" Value="true">
-                                                <Setter TargetName="ToggleButton" Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+            <Controls:SessionListView BorderThickness="0" x:Name="sessionListView" FocusVisualStyle="{x:Null}">
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource FlatListViewHeader}">
+                        <GridViewColumn Header="Connection" Width="200" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" 
+                                            Margin="{Binding IndentLevel, Mode=OneWay, Converter={StaticResource TreeIndentConverter}, ConverterParameter={StaticResource TreeIndent}}">
+                                        <Controls:TreeToggleButton x:Name="ToggleButton" IsChecked="{Binding IsExpanded, Mode=OneWay}" Visibility="Hidden"/>
+                                        <TextBlock Text="{Binding Title, Mode=OneWay}" Margin="2 0 0 0" />
+                                    </StackPanel>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding HasToggleButton, Mode=OneWay}" Value="true">
+                                            <Setter TargetName="ToggleButton" Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
 
-                            <!--<GridViewColumn Header="In / Out" Width="130" >
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Counters, Mode=OneWay}"/>
-                                            <Ellipse Name="Flag" Width="5" Height="5" Fill="{StaticResource FlaggedBrush}" VerticalAlignment="Top" Margin="2" Visibility="Hidden" />
-                                        </StackPanel>
-                                        <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding IsFlagged, Mode=OneWay}" Value="true">
-                                                <Setter TargetName="Flag" Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>-->
+                        <!--<GridViewColumn Header="In / Out" Width="130" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Counters, Mode=OneWay}"/>
+                                        <Ellipse Name="Flag" Width="5" Height="5" Fill="{StaticResource FlaggedBrush}" VerticalAlignment="Top" Margin="2" Visibility="Hidden" />
+                                    </StackPanel>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsFlagged, Mode=OneWay}" Value="true">
+                                            <Setter TargetName="Flag" Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>-->
 
-                            <GridViewColumn Header="Process" Width="130">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image Source="{Binding Process.Icon, Mode=OneWay}" Height="16" Width="16" />
-                                            <TextBlock Text="{Binding Process.Name, Mode=OneWay}" Margin="4 0 0 0"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                        <GridViewColumn Header="Process" Width="130">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="{Binding Process.Icon, Mode=OneWay}" Height="16" Width="16" />
+                                        <TextBlock Text="{Binding Process.Name, Mode=OneWay}" Margin="4 0 0 0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
 
-                            <GridViewColumn Header="PID" Width="50">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding PID, Mode=OneWay}"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                        <GridViewColumn Header="PID" Width="50">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding PID, Mode=OneWay}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
 
-                        </GridView>
-                    </ListView.View>
+                    </GridView>
+                </ListView.View>
 
-                </Controls:SessionListView>
-            </DockPanel>
+            </Controls:SessionListView>
             
             <GridSplitter Grid.Column="1" ResizeDirection="Columns" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowsPreview="False" Focusable="False" />
 
             <Grid Grid.Column="2" SnapsToDevicePixels="True" UseLayoutRounding="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="100" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="100" Name="inputRow" />
                 </Grid.RowDefinitions>
-                <Controls:ChunkView  x:Name="chunkView" Padding="1" />
-                <GridSplitter Grid.Row="1" ResizeDirection="Rows" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowsPreview="False" Focusable="False" />
                 
-                <Grid Grid.Row="2">
+                <Controls:ChunkView  x:Name="chunkView" Padding="1" />
+                <GridSplitter Height="5" Grid.Row="1" Visibility="{Binding Properties.InputVisibility}" ResizeDirection="Rows" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowsPreview="False" Focusable="False" />
+
+                <Grid Grid.Row="2" Visibility="{Binding Properties.InputVisibility}">
                     <TextBox Name="inputText" BorderBrush="{x:Null}" BorderThickness="0" PreviewLostKeyboardFocus="inputText_PreviewLostKeyboardFocus"
+                     SizeChanged="inputText_SizeChanged"
+                     AllowDrop="True" Drop="inputText_Drop" PreviewDragOver="inputText_PreviewDragOver"
                      FontFamily="Lucida Console" FontSize="13"
                      TextWrapping="NoWrap"
                      AcceptsReturn="True"
@@ -178,19 +183,26 @@
                             <TextBlock>Send by hitting <Bold>Ctrl+Enter</Bold></TextBlock>
                         </TextBox.ToolTip>
                     </TextBox>
-                    <Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="24 8" Padding="12 4" Content="_Send" 
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Padding="12 4" Content="_Send" 
                             IsTabStop="False" Focusable="False" 
                             FocusVisualStyle="{x:Null}" Click="Send_Click">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Visibility" Value="Hidden"/>
+                                <Setter Property="Margin" Value="0 0 24 8"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=inputText, Path=IsMouseOver}" Value="True">
+                                    <DataTrigger Binding="{Binding IsMouseOver, ElementName=inputText}" Value="True">
                                         <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Properties.InputText_ScrollViewer.ComputedHorizontalScrollBarVisibility }" Value="Visible">
+                                        <Setter Property="Margin" Value="0 0 24 24"/>
                                     </DataTrigger>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </Trigger>
+                                    <DataTrigger Binding="{Binding Properties.ShowSubmitButton }" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>

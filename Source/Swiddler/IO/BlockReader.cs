@@ -62,19 +62,20 @@ namespace Swiddler.IO
                 return false;
             }
 
-            switch (headByte)
+            if (headByte < 64)
             {
-                case Constants.InboundIPv4Packet:
-                case Constants.OutboundIPv4Packet:
-                case Constants.InboundIPv6Packet:
-                case Constants.OutboundIPv6Packet:
-                    CurrentChunk = ReadPacket((byte)headByte);
-                    break;
-                case Constants.MessageData:
-                    CurrentChunk = ReadMessage();
-                    break;
-                default:
-                    ThrowUnexpectedData(1, "Unknown record type"); break;
+                CurrentChunk = ReadPacket((byte)headByte);
+            }
+            else
+            {
+                switch (headByte)
+                {
+                    case Constants.MessageData:
+                        CurrentChunk = ReadMessage();
+                        break;
+                    default:
+                        ThrowUnexpectedData(1, "Unknown record type"); break;
+                }
             }
 
             return true;
@@ -82,26 +83,27 @@ namespace Swiddler.IO
 
         private int GetHeaderSize(byte headByte)
         {
-            switch (headByte)
+            if (headByte < 64)
             {
-                case Constants.InboundIPv4Packet:
-                case Constants.OutboundIPv4Packet:
-                    return Constants.IPv4PacketHeaderSize;
-                case Constants.InboundIPv6Packet:
-                case Constants.OutboundIPv6Packet:
-                    return Constants.IPv6PacketHeaderSize;
-                case Constants.MessageData:
-                    return Constants.MessageHeaderSize;
-                default:
-                    ThrowUnexpectedData(1, "Unknown record type"); return 0;
+                return 
+                    Constants.PacketBaseHeaderSize + 
+                    ((headByte & Constants.IPv6_Src) == 0 ? 4 : 16) +
+                    ((headByte & Constants.IPv6_Dst) == 0 ? 4 : 16) ;
+            }
+            else
+            {
+                switch (headByte)
+                {
+                    case Constants.MessageData:
+                        return Constants.MessageHeaderSize;
+                    default:
+                        ThrowUnexpectedData(1, "Unknown record type"); return 0;
+                }
             }
         }
 
         private Packet ReadPacket(byte type)
         {
-            bool isIPv6 = type == Constants.InboundIPv6Packet || type == Constants.OutboundIPv6Packet;
-            int addressLen = isIPv6 ? 16 : 4;
-
             /*
             type                : byte (1)      // type of the packet; 1 = InboundIPv4; 2 = OutboundIPv4; 3 = InboundIPv6; 4 = OutboundIPv6;
             block count         : uint16 (2)    // number of blocks this packet excesses (0 if this packet fits to the current block)
@@ -117,16 +119,19 @@ namespace Swiddler.IO
 
             var actualOffset = BaseStream.Position - 1; // minus type byte
 
+            var srcLen = (type & Constants.IPv6_Src) == 0 ? 4 : 16;
+            var dstLen = (type & Constants.IPv6_Dst) == 0 ? 4 : 16;
+
             var totalBlockCount = reader.ReadUInt16();
             var packet = new Packet()
             {
                 ActualOffset = actualOffset,
-                Flow = (type == Constants.InboundIPv4Packet || type == Constants.InboundIPv6Packet) ? TrafficFlow.Inbound : TrafficFlow.Outbound,
+                Flow = (type & Constants.InboundPacket) != 0 ? TrafficFlow.Inbound : TrafficFlow.Outbound,
                 Payload = new byte[reader.ReadUInt32()],
                 SequenceNumber = (long)reader.ReadUInt64(),
                 Timestamp = new DateTime(reader.ReadInt64(), DateTimeKind.Utc),
-                LocalEndPoint = new IPEndPoint(new IPAddress(reader.ReadBytes(addressLen)), reader.ReadUInt16()),
-                RemoteEndPoint = new IPEndPoint(new IPAddress(reader.ReadBytes(addressLen)), reader.ReadUInt16()),
+                Source = new IPEndPoint(new IPAddress(reader.ReadBytes(srcLen)), reader.ReadUInt16()),
+                Destination = new IPEndPoint(new IPAddress(reader.ReadBytes(dstLen)), reader.ReadUInt16()),
             };
 
             FillBuffer(packet.Payload, totalBlockCount);
@@ -285,5 +290,35 @@ namespace Swiddler.IO
             if (!LeaveStreamOpen)
                 BaseStream.Dispose();
         }
+
+        public Packet GetFirstPacket()
+        {
+            Position = 0;
+            while (CurrentChunk != null)
+            {
+                if (CurrentChunk is Packet p)
+                    return p;
+                Read();
+            }
+            return null;
+        }
+
+        public Packet GetLastPacket()
+        {
+            Position = long.MaxValue;
+            while (CurrentChunk != null)
+            {
+                if (CurrentChunk is Packet p)
+                    return p;
+                
+                var prevPos = Position;
+                Position = CurrentChunk.ActualOffset - 1;
+                if (Position == prevPos)
+                    break;
+            }
+
+            return null;
+        }
+
     }
 }

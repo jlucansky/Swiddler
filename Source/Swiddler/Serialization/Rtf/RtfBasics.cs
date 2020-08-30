@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Media;
 
-namespace Swiddler.Utils.RtfWriter
+namespace Swiddler.Serialization.Rtf
 {
     /// <summary>
     /// Horizontal alignment.

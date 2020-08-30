@@ -395,6 +395,14 @@ namespace Swiddler.Rendering
             }
         }
 
+        public void SetSelection(Packet start, Packet end)
+        {
+            SelectionLayer.ResetSelection();
+            SelectionStart = new SelectionAnchor() { Chunk = start };
+            SelectionEnd = new SelectionAnchor() { Chunk = end, Offset = end.Payload.Length };
+            SelectionLayer.AdjustSelectionAnchors();
+        }
+
         private readonly FirstVisibleFragmentComparerImpl _firstVisibleFragmentComparer = new FirstVisibleFragmentComparerImpl();
         IComparer<Fragment> FirstVisibleFragmentComparer
         {

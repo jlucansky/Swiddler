@@ -3,6 +3,7 @@ using Swiddler.DataChunks;
 using Swiddler.Utils;
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 
 namespace Swiddler.IO
@@ -65,21 +66,26 @@ namespace Swiddler.IO
             }
             */
 
-            bool isIPv6 = packet.LocalEndPoint.IsIPv6();
-            var packetHeaderSize = isIPv6 ? Constants.IPv6PacketHeaderSize : Constants.IPv4PacketHeaderSize;
+            var src = packet.Source.Address;
+            var dst = packet.Destination.Address;
+
+            var srcBytes = src.GetAddressBytes();
+            var dstBytes = dst.GetAddressBytes();
+
+            var packetHeaderSize = Constants.PacketBaseHeaderSize + srcBytes.Length + dstBytes.Length;
 
             WriteCore(packetHeaderSize, packet.Payload, totalBlockCount =>
             {
                 packet.ActualOffset = Position;
-                writer.Write(GetPacketTypeCode(isIPv6, packet.Flow));   // type
+                writer.Write(GetPacketTypeCode(src, dst, packet.Flow)); // type
                 writer.Write((UInt16)totalBlockCount);                  // block count
                 writer.Write((UInt32)packet.Payload.Length);            // length
                 writer.Write((UInt64)packet.SequenceNumber);            // sequence number
-                writer.Write((Int64)packet.Timestamp.Ticks);            // time
-                writer.Write(packet.LocalEndPoint.Address.GetAddressBytes()); // src ip
-                writer.Write((UInt16)packet.LocalEndPoint.Port);        // src port
-                writer.Write(packet.RemoteEndPoint.Address.GetAddressBytes()); // dst ip
-                writer.Write((UInt16)packet.RemoteEndPoint.Port);       // dst port
+                writer.Write((Int64)packet.Timestamp.UtcDateTime.Ticks);// time
+                writer.Write(srcBytes);                                 // src ip
+                writer.Write((UInt16)packet.Source.Port);               // src port
+                writer.Write(dstBytes);                                 // dst ip
+                writer.Write((UInt16)packet.Destination.Port);          // dst port
             });
 
             packet.ActualLength = (int)(Position - packet.ActualOffset);
@@ -115,7 +121,7 @@ namespace Swiddler.IO
                 writer.Write((UInt16)totalBlockCount);                  // block count
                 writer.Write((UInt32)data.Length);                      // length
                 writer.Write((UInt64)message.SequenceNumber);           // sequence number
-                writer.Write((Int64)message.Timestamp.Ticks);           // time
+                writer.Write((Int64)message.Timestamp.UtcDateTime.Ticks);// time
                 writer.Write((byte)message.Type);                       // msg type
             });
 
@@ -192,17 +198,23 @@ namespace Swiddler.IO
             return blockCount;
         }
 
-        private static byte GetPacketTypeCode(bool isIPv6, TrafficFlow flow)
+        private static byte GetPacketTypeCode(IPAddress src, IPAddress dst, TrafficFlow flow)
         {
-            switch (flow)
-            {
-                case TrafficFlow.Inbound:
-                    return isIPv6 ? Constants.InboundIPv6Packet : Constants.InboundIPv4Packet;
-                case TrafficFlow.Outbound:
-                    return isIPv6 ? Constants.OutboundIPv6Packet : Constants.OutboundIPv4Packet;
-                default:
-                    throw new InvalidOperationException("Invalid flow " + flow);
-            }
+            byte flag = 0;
+
+            if (flow == TrafficFlow.Inbound)
+                flag |= Constants.InboundPacket;
+            else if (flow == TrafficFlow.Outbound)
+                flag |= Constants.OutboundPacket;
+            else
+                throw new InvalidOperationException("Invalid flow " + flow);
+
+            if (src.AddressFamily == AddressFamily.InterNetworkV6)
+                flag |= Constants.IPv6_Src;
+            if (dst.AddressFamily == AddressFamily.InterNetworkV6)
+                flag |= Constants.IPv6_Dst;
+
+            return flag;
         }
 
         public void Dispose()

@@ -1,4 +1,5 @@
 ﻿using Swiddler.ChunkViews;
+using Swiddler.DataChunks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -134,6 +135,34 @@ namespace Swiddler.Rendering
                 var caret = new SelectionAnchorCaret() { Fragment = fragment };
                 fragment.Source.PrepareSelectionAnchor(caret);
                 SetSelection(caret);
+
+                if (Owner.Mouse.SelectWholeChunks)
+                {
+                    SelectionStart = null;
+                    SelectionEnd = null;
+
+                    var content = Owner.Content;
+
+                    if (content.SelectionStart.CompareTo(content.SelectionEnd) > 0)
+                    {
+                        if (Owner.Content.SelectionStart.Chunk is Packet startPacket)
+                        {
+                            content.SelectionStart = new SelectionAnchor() { Chunk = content.SelectionStart.Chunk, Offset = startPacket.Payload.Length }; ;
+                            content.SelectionEnd.Offset = 0;
+                        }
+                    }
+                    else
+                    {
+                        if (Owner.Content.SelectionEnd.Chunk is Packet endPacket)
+                        {
+                            content.SelectionStart.Offset = 0;
+                            content.SelectionEnd = new SelectionAnchor() { Chunk = content.SelectionEnd.Chunk, Offset = endPacket.Payload.Length };
+                        }
+                    }
+
+                    AdjustSelectionAnchors();
+                }
+
                 return true;
             }
             return false;

@@ -10,7 +10,7 @@ namespace Swiddler.NetworkSniffer
 
         public IPEndPoint Source, Destination;
 
-        public ProtocolType Protocol = ProtocolType.Unknown; 
+        public ProtocolType Protocol = ProtocolType.Unspecified; 
 
         public int HeaderLength; // = dataOffset
         public int DataLength;

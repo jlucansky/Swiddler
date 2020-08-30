@@ -14,8 +14,8 @@ namespace Swiddler.DataChunks
 
         public byte[] Payload { get; set; }
 
-        public IPEndPoint LocalEndPoint { get; set; }
-        public IPEndPoint RemoteEndPoint { get; set; }
+        public IPEndPoint Source { get; set; }
+        public IPEndPoint Destination { get; set; }
 
         public TrafficFlow Flow { get; set; }
     }

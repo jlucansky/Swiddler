@@ -29,6 +29,8 @@
             </ComboBox.GroupStyle>
         </Controls:ComboBoxEx>
 
+        <CheckBox Margin="4 8 4 4" HorizontalAlignment="Left" IsChecked="{Binding PromiscuousMode}">Promiscuous mode</CheckBox>
+
         <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
             <Label Target="{Binding ElementName=gridFilter}" HorizontalAlignment="Left">Capture _filter</Label>
             <ContentControl Style="{StaticResource HelpControlStyle}" ToolTip="Leave address or port empty to bypass filter." />

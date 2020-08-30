@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace Swiddler.Utils.RtfWriter
+namespace Swiddler.Serialization.Rtf
 {
     /// <summary>
     /// Summary description for RtfUtility

@@ -1,6 +1,7 @@
 ﻿using Swiddler.Common;
 using Swiddler.DataChunks;
 using System;
+using System.Net;
 using System.Net.Sockets;
 
 namespace Swiddler.Channels
@@ -35,9 +36,10 @@ namespace Swiddler.Channels
             try
             {
                 client = Listener.EndAcceptTcpClient(result);
-                var remoteEP = client.Client.RemoteEndPoint;
+                var remoteEP = (IPEndPoint)client.Client.RemoteEndPoint;
                 var child = Session.NewChildSession("Accepted connection from " + remoteEP, newSession => CreateChildChannel(newSession, client));
-                ((TcpChannel)child.ServerChannel).IsServerChannel = true;
+                var tcpChannel = (TcpChannel)child.ServerChannel;
+                tcpChannel.IsServerChannel = true;
                 child.Name = $"{remoteEP}";
                 child.ResolveProcessIdAsync(remoteEP);
                 child.StartAsync();

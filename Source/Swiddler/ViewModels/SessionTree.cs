@@ -1,6 +1,8 @@
 ﻿using Swiddler.Common;
+using Swiddler.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Swiddler.ViewModels
@@ -14,7 +16,7 @@ namespace Swiddler.ViewModels
         private readonly List<Session> _RootSessions;
 
         public IReadOnlyList<SessionListItem> FlattenItems => _FlattenItems; // bind to ListView
-        private readonly ObservableRangeCollection<SessionListItem> _FlattenItems;
+        private readonly ObservableCollection<SessionListItem> _FlattenItems;
 
         private class SessionEntry
         {
@@ -27,7 +29,7 @@ namespace Swiddler.ViewModels
         public SessionTree()
         {
             _RootSessions = new List<Session>();
-            _FlattenItems = new ObservableRangeCollection<SessionListItem>();
+            _FlattenItems = new ObservableCollection<SessionListItem>();
             sessionMap = new Dictionary<Session, SessionEntry>();
         }
 
@@ -81,7 +83,6 @@ namespace Swiddler.ViewModels
                 rootItem.IsExpanded = true;
             }
 
-
             if (rootItem.IsExpanded == true)
             {
                 var index = _FlattenItems.IndexOf(rootItem);
@@ -125,11 +126,14 @@ namespace Swiddler.ViewModels
             }
         }
 
-        public void Expand(SessionListItem item) => Expand(IndexOf(item));
-        public void Collapse(SessionListItem item) => Collapse(IndexOf(item));
-
-
         public int IndexOf(SessionListItem item) => _FlattenItems.IndexOf(item);
+
+        public SessionListItem GetItem(Session session)
+        {
+            if (sessionMap.TryGetValue(session, out var entry))
+                return entry.SessionListItem;
+            return null;
+        }
 
         private void RaiseItemAdded(int index)
         {

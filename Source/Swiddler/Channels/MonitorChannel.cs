@@ -93,8 +93,8 @@ namespace Swiddler.Channels
                     var packet = new Packet()
                     {
                         Payload = capPacket.Data,
-                        LocalEndPoint = (IPEndPoint)socket.LocalEndPoint,
-                        RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint,
+                        Source = (IPEndPoint)socket.LocalEndPoint,
+                        Destination = (IPEndPoint)socket.RemoteEndPoint,
                         Flow = GetTrafficFlow(capPacket.Event)
                     };
 
@@ -123,7 +123,7 @@ namespace Swiddler.Channels
         static string GetSessionName(CapturedPacket capPacket)
         {
             if (capPacket.LocalEndPoint != null && capPacket.RemoteEndPoint != null)
-                return $"{capPacket.Protocol.ToString().Substring(0, 1)} :{ capPacket.LocalEndPoint.Port } > {capPacket.RemoteEndPoint}";
+                return $"{capPacket.Protocol.ToString().Substring(0, 1)} :{ capPacket.LocalEndPoint.Port } → {capPacket.RemoteEndPoint}";
             else
                 return $"0x{capPacket.Handle:X8}";
         }

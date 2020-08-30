@@ -19,11 +19,11 @@ namespace Swiddler.IO
 
 
         readonly StorageHandle storage;
-        readonly IDataTransferTarget target;
+        readonly IChunkWriter target;
 
-        public DataTransfer(StorageHandle storage, Stream target) : this (storage, new StreamTransferTarget(target)) { }
+        public DataTransfer(StorageHandle storage, Stream target) : this (storage, new StreamChunkWriter(target)) { }
 
-        public DataTransfer(StorageHandle storage, IDataTransferTarget target)
+        public DataTransfer(StorageHandle storage, IChunkWriter target)
         {
             this.storage = storage;
             this.target = target;
@@ -48,7 +48,6 @@ namespace Swiddler.IO
                 reader.Read();
                 CancellationToken.ThrowIfCancellationRequested();
             }
-            target.Flush();
         }
 
         public void CopyRange(IDataChunk start, IDataChunk end, Func<IDataChunk, byte[]> payload)

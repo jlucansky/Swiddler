@@ -138,7 +138,8 @@ namespace Swiddler.Utils
         {
             try
             {
-                GrantAuthorization(Assembly.GetEntryAssembly().GetLocalPath(), "Swiddler");
+                if (IsFirewallEnabled) // add firewall exception only if firewall is on
+                    GrantAuthorization(Assembly.GetEntryAssembly().GetLocalPath(), "Swiddler");
             }
             catch
             {

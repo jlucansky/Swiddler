@@ -9,13 +9,16 @@ using System.Windows.Markup;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Swiddler")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyDescription("TCP/UDP debugging tool")]
+[assembly: AssemblyCompany("Jan Lucansky")]
 [assembly: AssemblyProduct("Swiddler")]
 [assembly: AssemblyCopyright("Copyright © 2018-2020 Jan Lucansky")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#else
+[assembly: AssemblyConfiguration("Release")]
+#endif
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
@@ -50,6 +53,6 @@ using System.Windows.Markup;
 //      Revision
 //
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.5.2008")]
 
-[assembly: AssemblyInformationalVersion("1.0.4")]
+[assembly: AssemblyInformationalVersion("1.0.5")]

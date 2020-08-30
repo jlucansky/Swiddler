@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Swiddler.Utils.RtfWriter
+namespace Swiddler.Serialization.Rtf
 {
     /// <summary>
     /// Summary description for RtfParagraph

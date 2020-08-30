@@ -1,4 +1,4 @@
-namespace Swiddler.Utils.RtfWriter
+namespace Swiddler.Serialization.Rtf
 {
     /// <summary>
     /// Internal use only.

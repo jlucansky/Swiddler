@@ -10,7 +10,7 @@ namespace Swiddler.Channels
     {
         public UdpClient Client { get; }
         public IPEndPoint RemoteEndpoint { get; set; }
-        public IPEndPoint LocalEndPoint { get; private set; }
+        public IPEndPoint LocalEndPoint { get; set; }
 
         bool connected;
 
@@ -50,8 +50,8 @@ namespace Swiddler.Channels
                 var packet = new Packet()
                 {
                     Payload = data,
-                    LocalEndPoint = LocalEndPoint,
-                    RemoteEndPoint = remote,
+                    Source = remote,
+                    Destination = LocalEndPoint,
                 };
 
                 NotifyObservers(packet);
@@ -68,13 +68,18 @@ namespace Swiddler.Channels
         {
             try
             {
-                if (packet.LocalEndPoint == null) packet.LocalEndPoint = LocalEndPoint;
-                if (packet.RemoteEndPoint == null) packet.RemoteEndPoint = RemoteEndpoint;
+                if (packet.Source == null) packet.Source = LocalEndPoint;
+                if (packet.Destination == null) packet.Destination = RemoteEndpoint;
 
                 if (connected)
+                {
+                    packet.Destination = RemoteEndpoint;
                     Client.Send(packet.Payload, packet.Payload.Length);
+                }
                 else
-                    Client.Send(packet.Payload, packet.Payload.Length, packet.RemoteEndPoint);
+                {
+                    Client.Send(packet.Payload, packet.Payload.Length, packet.Destination);
+                }
             }
             catch (Exception ex)
             {

@@ -19,6 +19,9 @@
     <Style x:Key="ToolBar" TargetType="ToolBar">
         <Style.Resources>
             <SolidColorBrush x:Key="ToolBarHorizontalBackground" Color="{StaticResource {x:Static SystemColors.ControlColorKey}}"/>
+            <SolidColorBrush x:Key="HoverButtonBrush" Color="#210080FF"/>
+            <SolidColorBrush x:Key="PressedButtonBrush" Color="#007ACC"/>
+            <SolidColorBrush x:Key="ToggledButtonBorder" Color="#3399ff"/>
 
             <Style x:Key="{x:Static ToolBar.SeparatorStyleKey}" TargetType="{x:Type Separator}">
                 <Setter Property="Margin" Value="5 2" />
@@ -35,13 +38,44 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" TargetName="Bd" Value="#210080FF"/>
+                                    <Setter Property="Background" TargetName="Bd" Value="{StaticResource HoverButtonBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsKeyboardFocused" Value="True">
-                                    <Setter Property="Background" TargetName="Bd" Value="#210080FF"/>
+                                    <Setter Property="Background" TargetName="Bd" Value="{StaticResource HoverButtonBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" TargetName="Bd" Value="#007ACC"/>
+                                    <Setter Property="Background" TargetName="Bd" Value="{StaticResource PressedButtonBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="{x:Static ToolBar.ToggleButtonStyleKey}" TargetType="ToggleButton">
+                <Setter Property="Height" Value="24"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                            <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" TargetName="Bd" Value="{StaticResource HoverButtonBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter Property="Background" TargetName="Bd" Value="{StaticResource HoverButtonBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background" TargetName="Bd" Value="{StaticResource HoverButtonBrush}"/>
+                                    <Setter Property="BorderBrush" TargetName="Bd" Value="{StaticResource ToggledButtonBorder}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" TargetName="Bd" Value="{StaticResource PressedButtonBrush}"/>
                                     <Setter Property="Foreground" Value="White"/>
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">

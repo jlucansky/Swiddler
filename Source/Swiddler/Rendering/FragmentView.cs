@@ -1,19 +1,17 @@
 ﻿using Swiddler.Common;
 using Swiddler.IO;
-using Swiddler.Utils.RtfWriter;
+using Swiddler.Serialization.Rtf;
+using Swiddler.Utils;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace Swiddler.Rendering
 {
@@ -34,6 +32,7 @@ namespace Swiddler.Rendering
 
 
         public event EventHandler<double> OleProgressChanged; // reporting progress for clipboard / drag & drop
+        public event EventHandler<Session> SessionChanged;
 
         private FragmentViewMetrics Metrics => Content.Metrics;
 
@@ -264,6 +263,8 @@ namespace Swiddler.Rendering
             if (session == CurrentSession)
                 return;
 
+            SessionChanged?.Invoke(this, session);
+
             Content.Reset(); // clear all fragments & chunks cache
 
             if (CurrentSession != null)
@@ -327,14 +328,19 @@ namespace Swiddler.Rendering
                     using (var stream = new MemoryStream())
                     {
                         var rtf = new RtfDocument();
-                        var target = new CompositeTransferTarget(new StreamTransferTarget(stream), new RtfTransferTarget(rtf, Metrics.Encoding));
+                        var target = new CompositeChunkWriter(new StreamChunkWriter(stream), new RtfChunkWriter(rtf, Metrics.Encoding));
                         
                         var transfer = new DataTransfer(CurrentSession.Storage, target);
                         transfer.CopySelection(Content.SelectionStart, Content.SelectionEnd);
 
+                        var bytes = stream.ToArray();
+
                         DataObject data = new DataObject();
-                        data.SetData(DataFormats.Text, Metrics.Encoding.GetString(stream.ToArray()));
+                        data.SetData(DataFormats.Text, Metrics.Encoding.GetString(bytes));
                         data.SetData(DataFormats.Rtf, rtf.render());
+
+                        if (bytes.IsBinary())
+                            data.SetData(bytes.GetType().ToString(), bytes);
 
                         Clipboard.SetDataObject(data);
                     }
@@ -355,15 +361,32 @@ namespace Swiddler.Rendering
         {
             try
             {
+                bool savePcap = App.Current.PcapSelectionExport;
+
+                string name = $"cap-{DateTime.Now:yyyyMMdd-HHmmss}";
+
+                if (savePcap) name += ".pcap";
+
                 using (var cancellation = new CancellationTokenSource())
-                using (var stream = CurrentSession.Storage.CreateTempFile($"cap-{DateTime.Now.ToString("yyyyMMdd-HHmmss")}"))
+                using (var stream = CurrentSession.Storage.CreateTempFile(name))
                 {
-                    var transfer = new DataTransfer(CurrentSession.Storage, stream) { CancellationToken = cancellation.Token };
-                    transfer.ProgressChanged += (_, val) => ReportOleProgress(val);
-                    var copyTask = transfer.CopySelectionAsync(Content.SelectionStart, Content.SelectionEnd);
-                    var dataObject = new DeferredDataObject();
-                    dataObject.SetData(DataFormats.FileDrop, () => { copyTask.Wait(); return new[] { stream.Name }; });
-                    if (DragDrop.DoDragDrop(this, dataObject, DragDropEffects.Copy) == DragDropEffects.None) cancellation.Cancel();
+                    IChunkWriter target;
+
+                    if (savePcap)
+                        target = new PcapChunkWriter(stream, CurrentSession.ProtocolType);
+                    else
+                        target = new StreamChunkWriter(stream);
+
+                    using (target as IDisposable)
+                    {
+                        var transfer = new DataTransfer(CurrentSession.Storage, target) { CancellationToken = cancellation.Token };
+                        transfer.ProgressChanged += (_, val) => ReportOleProgress(val);
+                        var copyTask = transfer.CopySelectionAsync(Content.SelectionStart, Content.SelectionEnd);
+                        var dataObject = new DeferredDataObject();
+                        dataObject.SetSwiddlerSelection();
+                        dataObject.SetData(DataFormats.FileDrop, () => { copyTask.Wait(); stream.Flush(); return new[] { stream.Name }; });
+                        if (DragDrop.DoDragDrop(this, dataObject, DragDropEffects.Copy) == DragDropEffects.None) cancellation.Cancel();
+                    }
                 }
             }
             catch (Exception ex)
@@ -415,6 +438,15 @@ namespace Swiddler.Rendering
                 ResetSelection();
             }
 
+            if (e.ClickCount == 1)
+            {
+                Mouse.SelectWholeChunks = false;
+            }
+            else if (e.ClickCount == 2)
+            {
+                Mouse.SelectWholeChunks = true;
+            }
+
             System.Windows.Input.Mouse.Capture(this);
             Mouse.IsSelecting = true;
             UpdateMousePosition(e);
@@ -452,6 +484,7 @@ namespace Swiddler.Rendering
             Mouse.IsSelecting = false;
             Mouse.IsOverView = false;
             Mouse.LeftButtonDown = false;
+            Mouse.SelectWholeChunks = false;
             MouseChanged();
         }
 
@@ -470,6 +503,21 @@ namespace Swiddler.Rendering
             SelectionLayer.ResetSelection();
         }
 
+        public void SelectAll()
+        {
+            using (var reader = CurrentSession.Storage.CreateReader())
+            {
+                var first = reader.GetFirstPacket();
+                var last = reader.GetLastPacket();
+
+                if (first != null && last != null)
+                {
+                    Content.SetSelection(first, last);
+                    InvalidateArrange();
+                }
+            }
+        }
+
     }
 
     public class MouseState
@@ -480,6 +528,7 @@ namespace Swiddler.Rendering
         public bool IsOverView;
         public bool IsOverSelection;
         public bool LeftButtonDown;
+        public bool SelectWholeChunks;
 
         public bool IsCaptured => Mouse.Captured != null;
         public bool ShiftDown => Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);

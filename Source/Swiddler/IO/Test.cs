@@ -34,8 +34,8 @@ namespace Swiddler.IO
                         var packet = new Packet()
                         {
                             Flow = TrafficFlow.Inbound,
-                            LocalEndPoint = new IPEndPoint(IPAddress.Loopback, 123),
-                            RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, 456),
+                            Source = new IPEndPoint(IPAddress.Loopback, 123),
+                            Destination = new IPEndPoint(IPAddress.Loopback, 456),
                             SequenceNumber = seq++,
                             Payload = CreatePayload(i * 1),
                         };
@@ -65,8 +65,8 @@ namespace Swiddler.IO
                         var packet = new Packet()
                         {
                             Flow = i % 2 == 0 ? TrafficFlow.Inbound : TrafficFlow.Outbound,
-                            LocalEndPoint = new IPEndPoint(IPAddress.Loopback, 123),
-                            RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, 456),
+                            Source = new IPEndPoint(IPAddress.Loopback, 123),
+                            Destination = new IPEndPoint(IPAddress.Loopback, 456),
                             SequenceNumber = seq++,
                             Payload = new byte[i],
                         };

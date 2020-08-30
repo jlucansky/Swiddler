@@ -27,7 +27,7 @@ namespace Swiddler.Channels
 
             protected override void OnReceiveNotification(Packet packet) // send to UdpChannel from session editor
             {
-                packet.RemoteEndPoint = ep;
+                packet.Destination = ep;
                 ownerNotify(packet);
             }
 
@@ -48,7 +48,7 @@ namespace Swiddler.Channels
         }
 
         public RemoteChildChannel(Session session) : base(session) { }
-        protected override void OnReceiveNotification(Packet packet) => GetChild(packet.RemoteEndPoint).Send(packet);
+        protected override void OnReceiveNotification(Packet packet) => GetChild(packet.Source).Send(packet);
 
         private Mediator GetChild(IPEndPoint ep)
         {

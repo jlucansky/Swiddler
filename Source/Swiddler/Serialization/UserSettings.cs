@@ -12,11 +12,13 @@ namespace Swiddler.Serialization
         public Rect MainWindowBounds { get; set; }
         public WindowState MainWindowState { get; set; }
         public double MainWindowLeftColumn { get; set; }
+        public double MainWindowBottomRow { get; set; }
 
         public Rect NewConnectionWindowBounds { get; set; }
         public double NewConnectionLeftColumn { get; set; }
         public double NewConnectionRightColumn { get; set; }
 
+        public bool PcapSelectionExport { get; set; } = true;
 
         public List<string> QuickMRU { get; set; }
 

@@ -13,16 +13,17 @@ namespace Swiddler.IO
         /* Record Types */
         public const byte UnusedData = 0; // jump to the next block
 
-        public const byte InboundIPv4Packet = 1; // reads
-        public const byte OutboundIPv4Packet = 2; // writes
-        public const byte InboundIPv6Packet = 3; // reads
-        public const byte OutboundIPv6Packet = 4; // writes
+        public const byte InboundPacket = 1; // reads
+        public const byte OutboundPacket = 2; // writes
+        public const byte IPv6_Src = 4;
+        public const byte IPv6_Dst = 8;
+
         public const byte MessageData = 100;
 
 
 
         /* Record Headers */
-        private const int _packetBaseHeaderSize =
+        public const int PacketBaseHeaderSize =
             sizeof(byte)   +    // type                : byte (1)
             sizeof(UInt16) +    // block count         : uint16 (2)
             sizeof(UInt32) +    // length              : uint32 (4)
@@ -32,14 +33,6 @@ namespace Swiddler.IO
             sizeof(UInt16) +    // src port            : uint16 (2)
                                 // dst ip              : byte (4/16)
             sizeof(UInt16) ;    // dst port            : uint16 (2)
-
-        public const int IPv4PacketHeaderSize = _packetBaseHeaderSize +
-                4 +     // src ip       : byte (4)
-                4 ;     // dst ip       : byte (4)
-
-        public const int IPv6PacketHeaderSize = _packetBaseHeaderSize +
-                16 +    // src ip       : byte (16)
-                16 ;    // dst ip       : byte (16)
 
         public const int MessageHeaderSize =
             sizeof(byte)   +    // type                : byte (1)

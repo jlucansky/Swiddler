@@ -169,7 +169,7 @@ namespace Swiddler.ChunkViews
 
             for (int i = offset; i < end; i++)
             {
-                if (data[i] == 13 || data[i] == 10)
+                if (data[i] == 13 || data[i] == 10 || data[i] == 12)
                 {
                     reachedNewLine = true;
                     return i - offset;
@@ -197,7 +197,7 @@ namespace Swiddler.ChunkViews
             var txtFragLen = txtFrag.Length;
             var charWidth = fragment.View.Content.CharWidth;
             var fragLoc = fragment.Bounds.Location;
-            var bellowBottom = false;
+            var toTheEnd = false;
 
             if (caret.Anchor == null)
             {
@@ -209,7 +209,7 @@ namespace Swiddler.ChunkViews
                 if (fragment.View.Mouse.Position.Y > fragment.Bounds.Bottom)
                 {
                     caret.Anchor.Offset = fragment.IsTrailing ? txtFrag.Data.Length : txtFragLen + txtFragOffset;
-                    bellowBottom = true;
+                    toTheEnd = true;
                 }
                 else
                 {
@@ -217,9 +217,14 @@ namespace Swiddler.ChunkViews
                     caret.Anchor.Offset = Math.Min(txtFragLen, Math.Max(0, (int)((pos - fragLoc.X) / charWidth))) + txtFragOffset;
                 }
             }
+            else
+            {
+                if (caret.Anchor.Offset >= Chunk.Payload.Length)
+                    toTheEnd = true;
+            }
 
             caret.Bounds = new Rect(
-                bellowBottom ? fragment.Bounds.Right : fragLoc.X + (caret.Anchor.Offset - txtFragOffset) * charWidth,
+                toTheEnd ? fragment.Bounds.Right : fragLoc.X + (caret.Anchor.Offset - txtFragOffset) * charWidth,
                 fragLoc.Y,
                 charWidth,
                 fragment.Bounds.Height);

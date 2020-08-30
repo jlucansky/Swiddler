@@ -5,7 +5,6 @@ using Swiddler.Views;
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -26,6 +25,7 @@ namespace Swiddler
         public string RecentPath => Path.Combine(AppDataPath, "MRU");
         public string CertLogPath => Path.Combine(AppDataPath, "CertLog");
 
+        public bool PcapSelectionExport { get; set; } = true;
 
         protected override void OnStartup(StartupEventArgs e)
         {

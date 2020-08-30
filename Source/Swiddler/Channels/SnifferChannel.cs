@@ -12,6 +12,7 @@ namespace Swiddler.Channels
     public class SnifferChannel : Channel, IDisposable
     {
         public IPAddress LocalAddress { get; set; }
+        public bool PromiscuousMode { get; set; }
         public Tuple<IPEndPoint, ProtocolType>[] CaptureFilter { get; set; }
 
 
@@ -115,7 +116,7 @@ namespace Swiddler.Channels
                 }
 
                 socket.Bind(new IPEndPoint(ip, 0));
-                socket.IOControl(IOControlCode.ReceiveAll, RCVALL_IPLEVEL, null);
+                socket.IOControl(IOControlCode.ReceiveAll, PromiscuousMode ? RCVALL_ON : RCVALL_IPLEVEL, null);
 
                 BeginReceive();
             }
@@ -177,18 +178,26 @@ namespace Swiddler.Channels
 
                             var mediator = GetChild(raw);
                             
-                            packet.LocalEndPoint = mediator.EP.LocalEP;
-                            packet.RemoteEndPoint = mediator.EP.RemoteEP;
+                            if (mediator != null)
+                            {
+                                if (mediator.EP.LocalEP.Equals(raw.Source))
+                                {
+                                    packet.Flow = TrafficFlow.Outbound;
+                                    packet.Source = mediator.EP.LocalEP;
+                                    packet.Destination = mediator.EP.RemoteEP;
+                                }
+                                else
+                                {
+                                    packet.Flow = TrafficFlow.Inbound;
+                                    packet.Source = mediator.EP.RemoteEP;
+                                    packet.Destination = mediator.EP.LocalEP;
+                                }
 
-                            if (packet.LocalEndPoint.Equals(raw.Source))
-                                packet.Flow = TrafficFlow.Outbound;
-                            else    
-                                packet.Flow = TrafficFlow.Inbound;
+                                mediator.Send(packet);
 
-                            mediator.Send(packet);
-
-                            if (raw.Flags.HasFlag(TCPFlags.RST)) mediator.ClosingDueFlag("RST", raw.Source);
-                            if (raw.Flags.HasFlag(TCPFlags.FIN)) mediator.ClosingDueFlag("FIN", raw.Source);
+                                if (raw.Flags.HasFlag(TCPFlags.RST)) mediator.ClosingDueFlag("RST", raw.Source);
+                                if (raw.Flags.HasFlag(TCPFlags.FIN)) mediator.ClosingDueFlag("FIN", raw.Source);
+                            }
                         }
                     }
                 }
@@ -208,7 +217,11 @@ namespace Swiddler.Channels
             {
                 if (connections.TryGetValue(ep, out var mediator) == false)
                 {
+                    if (raw.Flags.HasFlag(TCPFlags.RST) || raw.Flags.HasFlag(TCPFlags.FIN))
+                        return null; // do not create child on closing session
+
                     var child = Session.NewChildSession();
+                    child.ProtocolType = raw.Protocol;
 
                     Session.Storage.Write(new MessageData() { Text = $"New connection observed {raw.Source} -> {raw.Destination}", Type = MessageType.Connecting });
 
@@ -228,12 +241,15 @@ namespace Swiddler.Channels
 
                     if (destination.Address.Equals(LocalAddress))
                     {
-                        child.Name = $"{source} > :{destination.Port} ({protoStr})";
+                        child.Name = $"{source} → :{destination.Port} ({protoStr})";
                         mediator.IsServer = true; // when first packet is directed toward local IP, then local EP is probably server
                     }
                     else
                     {
-                        child.Name = $":{source.Port} > {destination} ({protoStr})";
+                        if (source.Address.Equals(LocalAddress))
+                            child.Name = $":{source.Port} → {destination} ({protoStr})";
+                        else
+                            child.Name = $"{source} → {destination} ({protoStr})";
                     }
 
                     mediator.Observe(child.SessionChannel); // received packets write to session Log

@@ -19,12 +19,13 @@ namespace Swiddler.Common
 {
     public delegate void DataChangedDelegate(long atOffset);
 
-    public enum SessionState { New, Starting, Started, Error, Stopped }
+    public enum SessionState { New = 0 /* default */, Starting, Started, Error, Stopped , Offline = -1 }
 
     public class Session : BindableBase, IDisposable
     {
         public event DataChangedDelegate StorageDataChanged;
         public event EventHandler<Session> ChildSessionAdded;
+        public event EventHandler<SessionState> StateChanged;
 
         public List<Session> Children { get; } = new List<Session>();
         public Session Parent { get; private set; }
@@ -40,8 +41,7 @@ namespace Swiddler.Common
         public string CountersFormatted { get => _CountersFormatted; private set => SetProperty(ref _CountersFormatted, value); }
 
         SessionState _State;
-        public SessionState State { get => _State; private set => SetProperty(ref _State, value); }
-
+        public SessionState State { get => _State; private set { if (SetProperty(ref _State, value)) StateChanged?.Invoke(this, value); } }
 
         public StorageHandle Storage { get; private set; }
 
@@ -56,6 +56,8 @@ namespace Swiddler.Common
         public SessionChannel SessionChannel { get; } // input/output to FragmentView
         public Channel ServerChannel { get; set; }
         public Channel ClientChannel { get; set; }
+
+        public ProtocolType ProtocolType { get; set; } = ProtocolType.Unspecified;
 
         public ConnectionBanner ConnectionBanner { get; private set; } // info about estabilished connection
 
@@ -176,7 +178,8 @@ namespace Swiddler.Common
             var sniffer = new SnifferChannel(this)
             {
                 LocalAddress = localIP,
-                CaptureFilter = settings.CaptureFilter.Select(x => x.ToTuple()).ToArray()
+                CaptureFilter = settings.CaptureFilter.Select(x => x.ToTuple()).ToArray(),
+                PromiscuousMode = settings.PromiscuousMode,
             };
 
             ServerChannel = sniffer;
@@ -190,6 +193,8 @@ namespace Swiddler.Common
             var localEP = new IPEndPoint(IPAddress.Parse(settings.IPAddress), settings.Port.Value);
 
             Name = $"{localEP}";
+
+            ProtocolType = settings.Protocol;
 
             if (settings.Protocol == ProtocolType.Tcp)
             {
@@ -236,6 +241,8 @@ namespace Swiddler.Common
         private void StartClient()
         {
             var settings = ClientSettings;
+
+            ProtocolType = settings.Protocol;
 
             int elapsed = 0; // TODO: niekam vypisat alebo poznacit
 
@@ -326,14 +333,28 @@ namespace Swiddler.Common
                 if (ServerChannel != null && ClientChannel != null)
                 {
                     ServerChannel.DefaultFlow = TrafficFlow.Outbound;
-                    ServerChannel.ObserveTwoWay(ClientChannel); // relaying between two sockets
+
+                    ServerChannel.Observers.Insert(0, ClientChannel);
+                    ClientChannel.Observe(ServerChannel);
+
                     SessionChannel.Observers.Insert(0, ClientChannel); // user input data send to client channel
                     ClientChannel.Observe(SessionChannel);
+
+                    IPEndPoint src = null, dst = targetEP;
+
+                    var tcpServer = ServerChannel as TcpChannel;
+                    var tcpClient = ClientChannel as TcpChannel;
+
+                    if (tcpServer != null)
+                        src = (IPEndPoint)tcpServer.Client.Client.RemoteEndPoint;
+
+                    tcpClient?.SetEndPoints(src, dst);
+                    tcpServer?.SetEndPoints(dst, src);
                 }
             }
             else
             {
-                Name = $":{localEP.Port} > {targetEP}";
+                Name = $":{localEP.Port} → {targetEP}";
                 nameWhenStopped = null;
                 ResolveProcessIdAsync(targetEP);
                 if (!SessionChannel.Observers.Contains(ClientChannel)) // broadcast/multicast is oneway
@@ -414,6 +435,8 @@ namespace Swiddler.Common
         {
             var child = NewChildSession();
             WriteMessage(message, MessageType.Connecting);
+
+            child.ProtocolType = ProtocolType;
 
             if (propagateClientSettings)
                 child.ClientSettings = ClientSettings;

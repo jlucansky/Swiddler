@@ -2,12 +2,9 @@
 using Swiddler.DataChunks;
 using Swiddler.Utils;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 namespace Swiddler.Channels
 {
@@ -29,14 +26,20 @@ namespace Swiddler.Channels
             DefaultFlow = TrafficFlow.Inbound;
         }
 
+        public void SetEndPoints(IPEndPoint local, IPEndPoint remote)
+        {
+            if (local != null) localEndPoint = local;
+            if (remote != null) remoteEndPoint = remote;
+        }
+
         protected override void StartOverride()
         {
             socket = Client.Client;
 
             if (socket == null) return; // diposed by error on other side of tunnel
 
-            localEndPoint = (IPEndPoint)socket.LocalEndPoint;
-            remoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
+            if (localEndPoint == null) localEndPoint = (IPEndPoint)socket.LocalEndPoint;
+            if (remoteEndPoint == null) remoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
 
             try
             {
@@ -99,8 +102,16 @@ namespace Swiddler.Channels
 
         protected Packet FillEndpoints(Packet packet)
         {
-            if (packet.LocalEndPoint == null) packet.LocalEndPoint = localEndPoint;
-            if (packet.RemoteEndPoint == null) packet.RemoteEndPoint = remoteEndPoint;
+            if (packet.Flow == TrafficFlow.Outbound)
+            {
+                if (packet.Source == null) packet.Source = localEndPoint;
+                if (packet.Destination == null) packet.Destination = remoteEndPoint;
+            }
+            else
+            {
+                if (packet.Source == null) packet.Source = remoteEndPoint;
+                if (packet.Destination == null) packet.Destination = localEndPoint;
+            }
             return packet;
         }
 

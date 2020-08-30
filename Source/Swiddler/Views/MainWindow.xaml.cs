@@ -1,16 +1,17 @@
 ﻿using Swiddler.Commands;
 using Swiddler.Common;
-using Swiddler.DataChunks;
 using Swiddler.Serialization;
 using Swiddler.Utils;
 using Swiddler.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -28,10 +29,21 @@ namespace Swiddler.Views
 
         private ObservableCollection<string> quickMRU;
 
+        public bool PcapSelectionExport { get => App.Current.PcapSelectionExport; set => App.Current.PcapSelectionExport = value; }
+        public bool BinaryInput { get; private set; }
+
+        public Encoding InputEncoding { get; } = Encoding.GetEncoding(437); // IBM 437 (OEM-US)
+
+        public BindableProperties Properties { get; } = new BindableProperties();
+
         public MainWindow()
         {
             var userSettings = UserSettings.Load();
-            
+
+            App.Current.PcapSelectionExport = userSettings.PcapSelectionExport;
+
+            DataContext = this;
+
             InitializeComponent();
 
             if (userSettings.MainWindowBounds.HasSize())
@@ -45,7 +57,8 @@ namespace Swiddler.Views
 
             if (userSettings.MainWindowBounds.HasSize())
             {
-                if (userSettings.MainWindowLeftColumn > 0) leftCol.Width = new GridLength(userSettings.MainWindowLeftColumn, GridUnitType.Pixel);
+                if (userSettings.MainWindowLeftColumn > 0) leftCol.Width = new GridLength(userSettings.MainWindowLeftColumn);
+                if (userSettings.MainWindowBottomRow > 0) InputRowHeight = new GridLength(userSettings.MainWindowBottomRow);
             }
 
             InitMRU(userSettings.QuickMRU);
@@ -55,13 +68,25 @@ namespace Swiddler.Views
             sessionListView.SelectionChanged += SessionListView_SelectionChanged;
 
             chunkView.FragmentView.OleProgressChanged += OleProgressChanged;
+            chunkView.FragmentView.SessionChanged += FragmentView_SessionChanged;
+
+            CommandManager.AddPreviewExecutedHandler(inputText, (s, e) => { if (e.Command == ApplicationCommands.Paste) OnPasteCommand(s, e); });
 
             CommandBindings.Add(new CommandBinding(ApplicationCommands.New, NewConnection_Click));
             CommandBindings.Add(new CommandBinding(MiscCommands.Disconnect, Disconnect_Click));
             CommandBindings.Add(new CommandBinding(MiscCommands.QuickConnect, (s, e) => QuickConnectCombo.Focus()));
             CommandBindings.Add(new CommandBinding(MiscCommands.Send, (s, e) => Send()));
+            CommandBindings.Add(new CommandBinding(MiscCommands.SelectAll, (s, e) => SelectAll()));
+            CommandBindings.Add(new CommandBinding(MiscCommands.GoToStart, (s, e) => GoToStart()));
+            CommandBindings.Add(new CommandBinding(MiscCommands.GoToEnd, (s, e) => GoToEnd()));
+            CommandBindings.Add(new CommandBinding(MiscCommands.ToggleHex, (s, e) => ToggleBinaryInput(!BinaryInput)));
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Properties.InputText_ScrollViewer = inputText.Template.FindName("PART_ContentHost", inputText) as ScrollViewer;
+            Properties.InputVisibility = Visibility.Collapsed;
+        }
 
         void InitMRU(IEnumerable<string> mru)
         {
@@ -81,8 +106,10 @@ namespace Swiddler.Views
 
             settings.MainWindowBounds = new Rect(Left, Top, Width, Height);
             settings.MainWindowLeftColumn = leftCol.Width.Value;
+            settings.MainWindowBottomRow = InputRowHeight.Value;
             settings.MainWindowState = WindowState;
             settings.QuickMRU = quickMRU.Take(20).ToList();
+            settings.PcapSelectionExport = App.Current.PcapSelectionExport;
 
             settings.Save();
         }
@@ -97,6 +124,61 @@ namespace Swiddler.Views
         {
             var hwndSource = (HwndSource)HwndSource.FromVisual(this);
             taskbarProgress = new TaskbarProgress(hwndSource.Handle);
+        }
+
+        private void FragmentView_SessionChanged(object sender, Session newSession)
+        {
+            var oldSession = chunkView.FragmentView.CurrentSession;
+
+            if (oldSession != null)
+                oldSession.StateChanged -= Session_StateChanged;
+
+            newSession.StateChanged += Session_StateChanged;
+
+            UpdateCanStop(newSession.State);
+            UpdateInputVisibility(newSession);
+        }
+
+        private void Session_StateChanged(object sender, SessionState state)
+        {
+            UpdateCanStop(state);
+            UpdateInputVisibility(chunkView.CurrentSession);
+        }
+
+        void UpdateCanStop(SessionState state)
+        {
+            Properties.CanStop = state == SessionState.New || state == SessionState.Started || state == SessionState.Starting;
+        }
+
+        GridLength validInputRowHeight;
+
+        void UpdateInputVisibility(Session session)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                Properties.InputVisibility = session.SessionChannel?.IsActive == true ? Visibility.Visible : Visibility.Collapsed;
+
+                if (Properties.InputVisibility == Visibility.Visible && inputRow.Height.GridUnitType == GridUnitType.Auto)
+                {
+                    inputRow.Height = validInputRowHeight;
+                    inputRow.MinHeight = 40;
+                }
+                else if (Properties.InputVisibility != Visibility.Visible && inputRow.Height.GridUnitType != GridUnitType.Auto)
+                {
+                    validInputRowHeight = inputRow.Height;
+                    inputRow.Height = GridLength.Auto;
+                    inputRow.MinHeight = 0;
+                }
+            }));
+        }
+
+        GridLength InputRowHeight {
+            get => inputRow.Height.GridUnitType == GridUnitType.Auto ? validInputRowHeight : inputRow.Height;
+            set
+            {
+                validInputRowHeight = value;
+                if (inputRow.Height.GridUnitType != GridUnitType.Auto) inputRow.Height = value;
+            }
         }
 
         private void SessionTree_ItemAdded(object sender, int index)
@@ -119,48 +201,6 @@ namespace Swiddler.Views
             }
         }
 
-        // TODO: prec
-#if DEBUG
-        private void Log(string message)
-        {
-            //chunkView.CurrentSession.Logs.Add(new RawData() { Data = Encoding.Default.GetBytes(message), Flow = TrafficFlow.Inbound });
-
-            /*
-            chunkView.CurrentSession.Logs.Add(new Message() { Text = "1 longa sdlkjsdflkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
-            chunkView.CurrentSession.Logs.Add(new Message() { Text = "2 longa sdlkjsdflkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
-            chunkView.CurrentSession.Logs.Add(new Message() { Text = "3 longa sdlkjsdflkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
-            chunkView.CurrentSession.Logs.Add(new Message() { Text = "4 longa sdlkjsdflkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
-            chunkView.CurrentSession.Logs.Add(new Message() { Text = DateTime.Now.Ticks + "" });
-            chunkView.CurrentSession.Logs.Add(new Message() { Text = "5 longa sdlkjsdfldkj ls kd lkjasl fkkldfs jas f" + DateTime.Now.Ticks + "" });
-            */
-
-            chunkView.CurrentSession.Storage.Write(new Packet()
-            {
-                Flow = TrafficFlow.Outbound,
-                Payload = Encoding.Default.GetBytes("\nSTART\nrfeoiewoi=éiľršonľf\néiľršonľf\néiľršonľf\n\n\n\néiľršonľf\néiľršonľf\néiľršonľf\n")
-            });
-
-            chunkView.CurrentSession.Storage.Write(new Packet()
-            {
-                Flow = TrafficFlow.Outbound,
-                Payload = Encoding.Default.GetBytes("\n\n")
-            });
-
-            chunkView.CurrentSession.Storage.Write(new Packet()
-            {
-                Flow = TrafficFlow.Inbound,
-                Payload = Encoding.Default.GetBytes("\nWWWWWWWWWaaaaaaaabbbbbbbbb77778\n\n\n\n\n613531aaaaxWWWWWWWWWaaaaaaaabbbbbbbbb77778613531aaaax")
-            });
-
-            chunkView.CurrentSession.Storage.Write(new Packet()
-            {
-                Flow = TrafficFlow.Outbound,
-                Payload = Encoding.Default.GetBytes("fwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqerfwqaewqer")
-            });
-
-        }
-#endif
-
         private void InputText_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return && e.KeyboardDevice.Modifiers.HasFlag(ModifierKeys.Control) &&
@@ -170,11 +210,26 @@ namespace Swiddler.Views
             }
         }
 
+        void SelectAll() => chunkView.FragmentView.SelectAll();
+
+        void GoToStart() => chunkView.FragmentView.ScrollOwner.ScrollToHome();
+
+        void GoToEnd() => chunkView.FragmentView.ScrollOwner.ScrollToEnd();
+
         void Send()
         {
-            string text = inputText.Text;
-            chunkView.CurrentSession?.SessionChannel.Submit(Encoding.Default.GetBytes(text));
-            inputText.Clear();
+            if (chunkView.CurrentSession?.SessionChannel?.IsActive != true)
+                return;
+
+            try
+            {
+                chunkView.CurrentSession.SessionChannel.Submit(GetInputData(BinaryInput, inputText.Text));
+                inputText.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void NewConnection_Click(object sender, RoutedEventArgs e)
@@ -249,5 +304,180 @@ namespace Swiddler.Views
         {
             Keyboard.ClearFocus();
         }
+
+        private void OnPasteCommand(object sender, ExecutedRoutedEventArgs e)
+        {
+            string binFormat = typeof(byte[]).ToString();
+
+            if (Clipboard.ContainsData(binFormat) && Clipboard.GetData(binFormat) is byte[] data)
+            {
+                string insertingText;
+
+                if (BinaryInput)
+                    insertingText = data.FormatHex();
+                else
+                    insertingText = InputEncoding.GetString(data);
+
+                var selectionStart = inputText.SelectionStart;
+                var selectionLength = inputText.SelectionLength;
+                var text = inputText.Text;
+
+                text = $"{text.Substring(0, selectionStart)}{insertingText}{text.Substring(selectionStart + selectionLength)}";
+                inputText.Text = text;
+                inputText.SelectionStart = selectionStart + insertingText.Length;
+
+                e.Handled = true;
+            }
+        }
+
+        int GetHexLocation(int original)
+        {
+            return original * 3 + (original / 4) + (original / 16) + (original / 32);
+        }
+
+        void ToggleBinaryInput(bool enabled)
+        {
+            if (BinaryInput == enabled) return;
+
+            var selectionStart = inputText.SelectionStart;
+            var selectionLength = inputText.SelectionLength;
+            var selectionEnd = selectionStart + selectionLength;
+
+            if (enabled)
+            {
+                var data = InputEncoding.GetBytes(inputText.Text);
+                inputText.Text = data.FormatHex();
+                inputText.SelectionStart = GetHexLocation(selectionStart);
+                inputText.SelectionLength = GetHexLocation(selectionStart + selectionLength) - inputText.SelectionStart;
+            }
+            else
+            {
+                try
+                {
+                    inputText.Text.TokenizeHex(out var data, out var locations);
+                    inputText.Text = InputEncoding.GetString(data);
+
+                    if (data.Any())
+                    {
+                        int start = 0, end = 0;
+                        for (int i = 0; i < locations.Length; i++)
+                        {
+                            //var iplus = i + 1;
+                            if (locations[i] <= selectionStart)
+                                start = end = i;
+                            else if (locations[i] <= selectionEnd)
+                                end = i;
+                            else
+                            {
+                                if (selectionLength > 0 && locations[i - 1] < selectionEnd)
+                                    end++;
+                                break;
+                            }
+                        }
+
+                        if (locations.Last() < selectionStart)
+                            start++;
+
+                        if (selectionLength > 0 && locations.Last() < selectionEnd)
+                            end++;
+
+                        inputText.SelectionStart = start;
+                        inputText.SelectionLength = Math.Max(0, end - start);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    enabled = BinaryInput;
+                }
+            }
+
+            BinaryInput = enabled;
+            binaryInputButton.IsChecked = enabled;
+        }
+
+        byte[] GetInputData(bool binary, string text)
+        {
+            if (binary)
+            {
+                text.TokenizeHex(out var data, out _);
+                return data;
+            }
+            else
+            {
+                return InputEncoding.GetBytes(text);
+            }
+        }
+
+        private void BinaryInput_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleBinaryInput(((ToggleButton)sender).IsChecked == true);
+        }
+
+        private void inputText_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                try
+                {
+                    string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                    if (files[0].Length > 0)
+                    {
+                        var fi = new FileInfo(files[0]);
+                        if (fi.Length > 1024 * 1024)
+                            throw new Exception("File is too large.");
+
+                        byte[] data;
+
+                        using (var stream = File.Open(fi.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                        using (var mem = new MemoryStream())
+                        {
+                            stream.CopyTo(mem);
+                            data = mem.ToArray();
+                        }
+
+                        if (BinaryInput)
+                            inputText.Text = data.FormatHex();
+                        else
+                            inputText.Text = InputEncoding.GetString(data);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+            }
+        }
+
+        private void inputText_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop) && !e.Data.ContainsSwiddlerSelection())
+            {
+                e.Effects = DragDropEffects.Copy;
+                e.Handled = true; // accept files
+            }
+        }
+
+        private void inputText_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Properties.ShowSubmitButton = e.NewSize.Height > 50;
+        }
+
+        public class BindableProperties : BindableBase
+        {
+            ScrollViewer _InputText_ScrollViewer;
+            public ScrollViewer InputText_ScrollViewer { get => _InputText_ScrollViewer; set => SetProperty(ref _InputText_ScrollViewer, value); }
+
+            bool _CanStop = true;
+            public bool CanStop { get => _CanStop; set => SetProperty(ref _CanStop, value); }
+
+            Visibility _InputVisibility = Visibility.Visible;
+            public Visibility InputVisibility { get => _InputVisibility; set => SetProperty(ref _InputVisibility, value); }
+
+            bool _ShowSubmitButton = true;
+            public bool ShowSubmitButton { get => _ShowSubmitButton; set => SetProperty(ref _ShowSubmitButton, value); }
+        }
+
     }
 }
