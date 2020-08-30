@@ -291,24 +291,24 @@ namespace Swiddler.IO
                 BaseStream.Dispose();
         }
 
-        public Packet GetFirstPacket()
+        public Packet GetFirstPacket(Func<Packet, bool> predicate)
         {
             Position = 0;
             while (CurrentChunk != null)
             {
-                if (CurrentChunk is Packet p)
+                if (CurrentChunk is Packet p && predicate(p))
                     return p;
                 Read();
             }
             return null;
         }
 
-        public Packet GetLastPacket()
+        public Packet GetLastPacket(Func<Packet, bool> predicate)
         {
             Position = long.MaxValue;
             while (CurrentChunk != null)
             {
-                if (CurrentChunk is Packet p)
+                if (CurrentChunk is Packet p && predicate(p))
                     return p;
                 
                 var prevPos = Position;

@@ -507,8 +507,8 @@ namespace Swiddler.Rendering
         {
             using (var reader = CurrentSession.Storage.CreateReader())
             {
-                var first = reader.GetFirstPacket();
-                var last = reader.GetLastPacket();
+                var first = reader.GetFirstPacket(p => p.Payload.Length > 0);
+                var last = reader.GetLastPacket(p => p.Payload.Length > 0);
 
                 if (first != null && last != null)
                 {

@@ -225,18 +225,40 @@ namespace Swiddler.Rendering
 
                 var content = Owner.Content;
 
+                void SetMinBounds() => caret.Bounds = new Rect(0, -content.LineHeight, 0, 0);
+                void SetMaxBounds() => caret.Bounds = new Rect(0, Math.Max(content.Metrics.Viewport.Height, content.TextLayer.Height) + content.LineHeight, 0, 0);
+
                 if (anchor.Chunk.SequenceNumber > content.MaxAppendedSequence)
                 {
-                    caret.Bounds = new Rect(0, Math.Max(content.Metrics.Viewport.Height, content.TextLayer.Height) + content.LineHeight, 0, 0);
+                    SetMaxBounds();
                 }
                 else
                 {
                     var chunkView = content.TryGetChunkView(anchor.Chunk.SequenceNumber);
 
                     if (chunkView == null)
-                        caret.Bounds = new Rect(0, -content.LineHeight, 0, 0);
+                    {
+                        SetMinBounds();
+                    }
                     else
-                        chunkView.PrepareSelectionAnchor(caret);
+                    {
+                        if (chunkView.Location.Y > content.Metrics.Viewport.Height - content.View.ScrollTransform.Y)
+                        {
+                            SetMaxBounds();
+                        }
+                        else
+                        {
+                            if (chunkView.FirstFragmentIndex == -1 || chunkView.LastFragmentIndex == -1)
+                            {
+                                SetMinBounds();
+                            }
+                            else
+                            {
+                                chunkView.PrepareSelectionAnchor(caret);
+                            }
+                        }
+                    }
+
                 }
             }
 
