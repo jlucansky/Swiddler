@@ -10,7 +10,7 @@
              d:DataContext="{d:DesignInstance Rendering:MessageFragment, IsDesignTimeCreatable=True}"
              Margin="1">
 
-    <Border BorderBrush="{Binding Source.Color}" BorderThickness="{Binding OneByDpiScale}" Margin="5 7" Cursor="Arrow">
+    <Border BorderBrush="{Binding Source.Color}" BorderThickness="{Binding OneByDpiScale}" Margin="5 7" Cursor="Arrow" Background="White">
         <DockPanel>
             <Border Background="{Binding Source.Color}">
                 <Controls:CrispImage ImageName="{Binding Source.IconName}" Width="32" Height="32" Margin="5 0" />

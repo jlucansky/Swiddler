@@ -3,6 +3,7 @@ using Swiddler.DataChunks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 
 namespace Swiddler.Rendering
@@ -224,41 +225,24 @@ namespace Swiddler.Rendering
                 caret = new SelectionAnchorCaret() { Anchor = anchor };
 
                 var content = Owner.Content;
-
-                void SetMinBounds() => caret.Bounds = new Rect(0, -content.LineHeight, 0, 0);
-                void SetMaxBounds() => caret.Bounds = new Rect(0, Math.Max(content.Metrics.Viewport.Height, content.TextLayer.Height) + content.LineHeight, 0, 0);
-
-                if (anchor.Chunk.SequenceNumber > content.MaxAppendedSequence)
+                if (anchor.Chunk.SequenceNumber < content.TextLayer.Items.FirstOrDefault()?.Source.BaseChunk.SequenceNumber)
                 {
-                    SetMaxBounds();
+                    caret.Bounds = new Rect(0, -content.LineHeight, 0, 0);
+                }
+                else if (anchor.Chunk.SequenceNumber > content.TextLayer.Items.LastOrDefault()?.Source.BaseChunk.SequenceNumber)
+                {
+                    caret.Bounds = new Rect(0, Math.Max(content.Metrics.Viewport.Height, content.TextLayer.Height) + content.LineHeight, 0, 0);
                 }
                 else
                 {
                     var chunkView = content.TryGetChunkView(anchor.Chunk.SequenceNumber);
-
-                    if (chunkView == null)
+                    if (chunkView != null)
                     {
-                        SetMinBounds();
-                    }
-                    else
-                    {
-                        if (chunkView.Location.Y > content.Metrics.Viewport.Height - content.View.ScrollTransform.Y)
-                        {
-                            SetMaxBounds();
-                        }
+                        if (chunkView.FirstFragmentIndex != -1 && chunkView.LastFragmentIndex != -1)
+                            chunkView.PrepareSelectionAnchor(caret);
                         else
-                        {
-                            if (chunkView.FirstFragmentIndex == -1 || chunkView.LastFragmentIndex == -1)
-                            {
-                                SetMinBounds();
-                            }
-                            else
-                            {
-                                chunkView.PrepareSelectionAnchor(caret);
-                            }
-                        }
+                            Debug.Assert(false);
                     }
-
                 }
             }
 
