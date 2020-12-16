@@ -65,7 +65,7 @@ namespace Swiddler.SocketSettings
         {
             if (TargetPort == 80) return "http";
             if (TargetPort == 443) return "https";
-            return "tcp;";
+            return "tcp";
         }
     }
 }
