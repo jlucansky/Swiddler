@@ -53,6 +53,6 @@ using System.Windows.Markup;
 //      Revision
 //
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.5.2008")]
+[assembly: AssemblyFileVersion("1.0.6.2012")]
 
-[assembly: AssemblyInformationalVersion("1.0.5")]
+[assembly: AssemblyInformationalVersion("1.0.6")]
