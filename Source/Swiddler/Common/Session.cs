@@ -334,10 +334,10 @@ namespace Swiddler.Common
                 {
                     ServerChannel.DefaultFlow = TrafficFlow.Outbound;
 
-                    ServerChannel.Observers.Insert(0, ClientChannel);
+                    ServerChannel.ObserveAfter<RewriteChannel>(ClientChannel);
                     ClientChannel.Observe(ServerChannel);
 
-                    SessionChannel.Observers.Insert(0, ClientChannel); // user input data send to client channel
+                    SessionChannel.ObserveAfter<RewriteChannel>(ClientChannel); // user input data send to client channel
                     ClientChannel.Observe(SessionChannel);
 
                     IPEndPoint src = null, dst = targetEP;

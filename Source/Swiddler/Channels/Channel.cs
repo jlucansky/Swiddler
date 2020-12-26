@@ -34,6 +34,13 @@ namespace Swiddler.Channels
             Observers.Add(other);
         }
 
+        public void ObserveAfter<T>(Channel other) where T: Channel
+        {
+            int index = Observers.FindIndex(x => x is T) + 1;
+            if (index < 0) index = 0;
+            Observers.Insert(index, other);
+        }
+
         /// <summary>
         /// Marks all sending packets (Reads) from this channel with specified flow.
         /// </summary>
