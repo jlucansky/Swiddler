@@ -156,7 +156,8 @@ namespace Swiddler.Views
                 if (hi.GetServerNameIndication() is string sni && !string.IsNullOrEmpty(sni))
                     list.Add(Create("Server Name Indication", hi.GetServerNameIndication()));
 
-                list.AddRange(FormatExtensions(hi.Extensions));
+                if (hi.Extensions != null)
+                    list.AddRange(FormatExtensions(hi.Extensions));
 
                 Append(list, out var width);
             }

@@ -12,7 +12,7 @@ namespace Swiddler.Security
         public int[] Ciphers { get; set; }
 
         [XmlIgnore] public byte[] CompressionData { get; set; }
-        [XmlElement(nameof(CompressionData))] public string CompressionDataEncoded { get => Convert.ToBase64String(CompressionData); set => CompressionData = Convert.FromBase64String(value); }
+        [XmlElement(nameof(CompressionData))] public string CompressionDataEncoded { get => CompressionData == null ? null : Convert.ToBase64String(CompressionData); set => CompressionData = value == null ? null : Convert.FromBase64String(value); }
 
 
         public string[] GetCipherSuites()
