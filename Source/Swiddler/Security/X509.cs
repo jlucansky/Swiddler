@@ -25,6 +25,7 @@ namespace Swiddler.Security
     {
         // https://github.com/asafga-gsr-it/CertIntegration/blob/master/CertificateAdmin/CertificateAdmin/obj/Release/Package/PackageTmp/Certificate.cs
         // https://www.sysadmins.lv/blog-en/introducing-to-certificate-enrollment-apis-part-2-creating-offline-requests.aspx
+        // https://stackoverflow.com/questions/33001983/issues-compiling-in-windows-10
 
         /*
         public static X509Certificate2 CreateSelfSignedCA(string subjectName, DateTime notAfterUtc, bool machineContext)
@@ -132,7 +133,8 @@ namespace Swiddler.Security
             dn.Encode("CN=" + EscapeDNComponent(subjectName), X500NameFlags.XCN_CERT_NAME_STR_NONE);
 
             // create a new private key for the certificate
-            CX509PrivateKey privateKey = new CX509PrivateKey();
+            IX509PrivateKey privateKey = (IX509PrivateKey)Activator.CreateInstance(Type.GetTypeFromProgID("X509Enrollment.CX509PrivateKey", throwOnError: true));
+            
             privateKey.ProviderName = "Microsoft Base Cryptographic Provider v1.0";
             privateKey.MachineContext = machineContext;
             privateKey.Length = 2048;
@@ -190,7 +192,8 @@ namespace Swiddler.Security
             dnIssuer.Encode(issuer.Subject, X500NameFlags.XCN_CERT_NAME_STR_NONE);
 
             // Create the self signing request
-            var cert = new CX509CertificateRequestCertificate();
+            var cert = (IX509CertificateRequestCertificate)Activator.CreateInstance(Type.GetTypeFromProgID("X509Enrollment.CX509CertificateRequestCertificate", throwOnError: true));
+
             cert.InitializeFromPrivateKey(machineContext ? X509CertificateEnrollmentContext.ContextMachine : X509CertificateEnrollmentContext.ContextUser, privateKey, "");
             cert.Subject = dn;
             cert.Issuer = dnIssuer;
@@ -236,14 +239,14 @@ namespace Swiddler.Security
             dn.Encode(GetEncodedDistinguishedName(crt), X500NameFlags.XCN_CERT_NAME_STR_NONE);
 
             // create a new private key for the certificate
-            CX509PrivateKey privateKey = new CX509PrivateKey
-            {
-                ProviderName = "Microsoft Base Cryptographic Provider v1.0",
-                MachineContext = crt.MachineContext,
-                Length = crt.KeyLength,
-                KeySpec = X509KeySpec.XCN_AT_SIGNATURE, // use is not limited
-                ExportPolicy = X509PrivateKeyExportFlags.XCN_NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG
-            };
+            IX509PrivateKey privateKey = (IX509PrivateKey)Activator.CreateInstance(Type.GetTypeFromProgID("X509Enrollment.CX509PrivateKey", throwOnError: true));
+
+            privateKey.ProviderName = "Microsoft Base Cryptographic Provider v1.0";
+            privateKey.MachineContext = crt.MachineContext;
+            privateKey.Length = crt.KeyLength;
+            privateKey.KeySpec = X509KeySpec.XCN_AT_SIGNATURE; // use is not limited
+            privateKey.ExportPolicy = X509PrivateKeyExportFlags.XCN_NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG;
+
             privateKey.Create();
 
             var hashobj = new CObjectId();
@@ -338,7 +341,8 @@ namespace Swiddler.Security
             }
 
             // Create the self signing request
-            var cereq = new CX509CertificateRequestCertificate();
+            var cereq = (IX509CertificateRequestCertificate)Activator.CreateInstance(Type.GetTypeFromProgID("X509Enrollment.CX509CertificateRequestCertificate", throwOnError: true));
+
             cereq.InitializeFromPrivateKey(crt.MachineContext ? X509CertificateEnrollmentContext.ContextMachine : X509CertificateEnrollmentContext.ContextUser, privateKey, "");
 
             cereq.Subject = dn;
